@@ -6,6 +6,7 @@ inifile2
 * 支持解析ini文件
 * 支持修改、保存ini文件
 * 支持设置多个注释符，默认为“#”和';'
+* 支持参数名重复
 * 使用gtest和valgrind做过测试
 
 使用很简单 生成一个ini文件test.ini
