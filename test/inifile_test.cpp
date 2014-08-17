@@ -304,8 +304,12 @@ TEST(IniFile,deleteKey)
 	EXPECT_EQ(buf,string("USER=root\n[COMMON]\nPASSWD=tt\n#commit\n;---------\n[DEFINE]\nname=cxy\n"));
 
 }
+
+#ifdef GTEST_MAIN
 int main(int argc, char* argv[])
 {
     testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
 }
+
+#endif
