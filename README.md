@@ -31,5 +31,6 @@ IniFile ini;
 ini.open(filepath);
 
 //获取指定段的指定项的值
-string db_name = ini.getValue("COMMON","DB");
+int ret = 0;
+string db_name = ini.getValue("COMMON","DB",ret);
 ```
