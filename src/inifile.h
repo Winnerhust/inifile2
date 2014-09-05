@@ -48,6 +48,13 @@ public:
 	/*将内容另存到一个名为fname的文件*/
 	int saveas(const string &fname);
 	
+	/*获取section段第一个键为key的值,并返回其string型的值*/
+	string getStringValue(const string &section,const string &key,int &ret);
+	/*获取section段第一个键为key的值,并返回其int型的值*/
+	int getIntValue(const string &section,const string &key,int &ret);
+	/*获取section段第一个键为key的值,并返回其double型的值*/
+	double getDoubleValue(const string &section,const string &key,int &ret);
+	
 	/*获取section段第一个键为key的值,并将值赋到value中*/
 	int getValue(const string &section,const string &key,string &value);
 	/*获取section段第一个键为key的值,并将值赋到value中,将注释赋到comment中*/
