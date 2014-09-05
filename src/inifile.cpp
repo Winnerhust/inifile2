@@ -158,6 +158,8 @@ int IniFile::open(const string &filename)
 	}
 	
 	fclose(fp);
+	
+	return 0;
 }
 
 int IniFile::save()
@@ -204,6 +206,34 @@ IniSection *IniFile::getSection(const string &section /*=""*/)
 	}
 
 	return NULL;
+}
+
+string IniFile::getStringValue(const string &section,const string &key,int &ret)
+{
+	string value,comment;
+	
+	ret = getValue(section,key,value,comment);
+
+	return value;
+}
+
+int IniFile::getIntValue(const string &section,const string &key,int &ret)
+{
+	string value,comment;
+	
+	ret = getValue(section,key,value,comment);
+	
+	return atoi(value.c_str());
+}
+
+double IniFile::getDoubleValue(const string &section,const string &key,int &ret)
+{
+	string value,comment;
+	
+	ret = getValue(section,key,value,comment);
+	
+	return atof(value.c_str());
+
 }
 
 int IniFile::getValue(const string &section,const string &key,string &value)
