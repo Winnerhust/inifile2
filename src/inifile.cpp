@@ -1,28 +1,31 @@
 #ifndef _INIFILE_CPP
 #define _INIFILE_CPP
 
-#include "stringutil.h"
 #include "inifile.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
+
 namespace inifile{
-using namespace stringutil;
 
 int INI_BUF_SIZE=2048;
+
 IniFile::IniFile()
 {
 	flags_.push_back("#");
 	flags_.push_back(";");
 }
+
 bool IniFile::parse(const string &content,string &key,string &value,char c/*= '='*/)
 {
 	int i = 0;
 	int len = content.length();
 
-	while(i < len && content[i] != c){
+	while (i < len && content[i] != c){
 		++i;
 	}
-	if(i >= 0 && i < len){
+
+	if (i >= 0 && i < len){
 		key = string(content.c_str(),i);
 		value = string(content.c_str()+i+1,len-i-1);
 		return true;
@@ -40,22 +43,22 @@ int IniFile::getline(string &str,FILE *fp)
 	char *pbuf = NULL;
 	char * p = buf;
 	
-	if(buf == NULL){
+	if (buf == NULL){
 		fprintf(stderr,"no enough memory!exit!\n");
 		exit(-1);
 	}
 	
 	memset(buf,0,buf_size);
 	int total_size = buf_size;
-	while(fgets(p,buf_size,fp) != NULL){
+	while (fgets(p,buf_size,fp) != NULL){
 		plen = strlen(p);
 
-		if( plen > 0 && p[plen-1] != '\n' && !feof(fp)){
+		if ( plen > 0 && p[plen-1] != '\n' && !feof(fp)){
 	
 			total_size = strlen(buf)+buf_size;
 			pbuf = (char *)realloc(buf,total_size);
 			
-			if(pbuf == NULL){
+			if (pbuf == NULL){
 				free(buf);
 				fprintf(stderr,"no enough memory!exit!\n");
 				exit(-1);
@@ -85,7 +88,7 @@ int IniFile::open(const string &filename)
 	IniSection *section = NULL;
 	FILE *fp = fopen(filename.c_str(),"r");
 	
-	if(fp == NULL ){
+	if (fp == NULL ){
 		return -1;
 	}
 
@@ -96,33 +99,33 @@ int IniFile::open(const string &filename)
 	section = new IniSection();
 	sections_[""] = section;
 	
-	while(getline(line,fp) > 0){
+	while (getline(line,fp) > 0){
 		
 		trimright(line,'\n');
 		trimright(line,'\r');
 		trim(line);
 		
-		if(line.length() <= 0){
+		if (line.length() <= 0){
 			continue;
 		}
 
-		if(line[0] == '['){
+		if (line[0] == '['){
 			section = NULL;
 			int index = line.find_first_of(']');
 
-			if(index == -1){
+			if (index == -1){
 				fclose(fp);
 				fprintf(stderr,"没有找到匹配的]\n");
 				return -1;
 			}
 			int len = index-1;
-			if(len <= 0){
+			if (len <= 0){
 				fprintf(stderr,"段为空\n");
 				continue;
 			}
 			string s(line,1,len);
 
-			if(getSection(s.c_str()) != NULL){
+			if (getSection(s.c_str()) != NULL){
 				fclose(fp);
 				fprintf(stderr,"此段已存在:%s\n",s.c_str());
 				return -1;
@@ -134,15 +137,15 @@ int IniFile::open(const string &filename)
 			section->name = s;
 			section->comment = comment;
 			comment = "";
-		}else if(isComment(line)){
-			if(comment != ""){
+		}else if (isComment(line)){
+			if (comment != ""){
 				comment += delim + line ;
 			}else{
 				comment = line;
 			}
 		}else{
 			string key,value;
-			if(parse(line,key,value)){
+			if (parse(line,key,value)){
 				IniItem item;
 				item.key = key;
 				item.value = value;
@@ -170,18 +173,18 @@ int IniFile::save()
 int IniFile::saveas(const string &filename)
 {
 	string data = "";
-	for(iterator sect = sections_.begin(); sect != sections_.end(); ++sect){
-		if(sect->second->comment != ""){
+	for (iterator sect = sections_.begin(); sect != sections_.end(); ++sect){
+		if (sect->second->comment != ""){
 			data += sect->second->comment;	
 			data += delim;
 		}
-		if(sect->first != ""){
+		if (sect->first != ""){
 			data += string("[")+sect->first + string("]");	
 			data += delim;
 		}
 
-		for(IniSection::iterator item = sect->second->items.begin(); item != sect->second->items.end(); ++item){
-			if(item->comment != ""){
+		for (IniSection::iterator item = sect->second->items.begin(); item != sect->second->items.end(); ++item){
+			if (item->comment != ""){
 				data += item->comment;	
 				data += delim;
 			}
@@ -201,7 +204,7 @@ int IniFile::saveas(const string &filename)
 IniSection *IniFile::getSection(const string &section /*=""*/)
 {
 	iterator it = sections_.find(section);
-	if(it != sections_.end()){
+	if (it != sections_.end()){
 		return it->second;
 	}
 
@@ -245,9 +248,9 @@ int IniFile::getValue(const string &section,const string &key,string &value,stri
 {
 	IniSection * sect = getSection(section);
 
-	if(sect != NULL){
-		for(IniSection::iterator it = sect->begin(); it != sect->end(); ++it){
-			if(it->key == key){
+	if (sect != NULL){
+		for (IniSection::iterator it = sect->begin(); it != sect->end(); ++it){
+			if (it->key == key){
 				value = it->value;
 				comment = it->comment;
 				return RET_OK;
@@ -272,9 +275,9 @@ int IniFile::getValues(const string &section,const string &key,
 
 	IniSection * sect = getSection(section);
 
-	if(sect != NULL){
-		for(IniSection::iterator it = sect->begin(); it != sect->end(); ++it){
-			if(it->key == key){
+	if (sect != NULL){
+		for (IniSection::iterator it = sect->begin(); it != sect->end(); ++it){
+			if (it->key == key){
 				value = it->value;
 				comment = it->comment;
 				
@@ -297,9 +300,9 @@ bool IniFile::hasKey(const string &section,const string &key)
 {
 	IniSection * sect = getSection(section);
 
-	if(sect != NULL){
-		for(IniSection::iterator it = sect->begin(); it != sect->end(); ++it){
-			if(it->key == key){
+	if (sect != NULL){
+		for (IniSection::iterator it = sect->begin(); it != sect->end(); ++it){
+			if (it->key == key){
 				return true;
 			}
 		}
@@ -312,7 +315,7 @@ int IniFile::getSectionComment(const string &section,string & comment)
 	comment = "";
 	IniSection * sect = getSection(section);
 	
-	if(sect != NULL){
+	if (sect != NULL){
 		comment = sect->comment;
 		return RET_OK;
 	}
@@ -323,7 +326,7 @@ int IniFile::setSectionComment(const string &section,const string & comment)
 {
 	IniSection * sect = getSection(section);
 	
-	if(sect != NULL){
+	if (sect != NULL){
 		sect->comment = comment;
 		return RET_OK;
 	}
@@ -340,9 +343,9 @@ int IniFile::setValue(const string &section,const string &key,
 	if (comt != ""){
 		comt = flags_[0] +comt;
 	} 
-	if(sect == NULL){
+	if (sect == NULL){
 		sect = new IniSection();
-		if(sect == NULL){
+		if (sect == NULL){
 			fprintf(stderr,"no enough memory!\n");
 			exit(-1);
 		}
@@ -350,8 +353,8 @@ int IniFile::setValue(const string &section,const string &key,
 		sections_[section] = sect;
 	}
 	
-	for(IniSection::iterator it = sect->begin(); it != sect->end(); ++it){
-		if(it->key == key){
+	for (IniSection::iterator it = sect->begin(); it != sect->end(); ++it){
+		if (it->key == key){
 			it->value = value;
 			it->comment = comt;
 			return RET_OK;
@@ -381,7 +384,7 @@ void IniFile::deleteSection(const string &section)
 {
 	IniSection *sect = getSection(section);
 
-	if(sect != NULL){
+	if (sect != NULL){
 	
 		sections_.erase(section);	
 		delete sect;
@@ -391,9 +394,9 @@ void IniFile::deleteKey(const string &section,const string &key)
 {
 	IniSection * sect = getSection(section);
 	
-	if(sect != NULL){
-		for(IniSection::iterator it = sect->begin(); it != sect->end(); ++it){
-			if(it->key == key){
+	if (sect != NULL){
+		for (IniSection::iterator it = sect->begin(); it != sect->end(); ++it){
+			if (it->key == key){
 				sect->items.erase(it);
 				break;
 			}
@@ -406,7 +409,7 @@ void IniFile::release()
 {
 	fname_ = "";
 
-	for(iterator i = sections_.begin(); i != sections_.end(); ++i){
+	for (iterator i = sections_.begin(); i != sections_.end(); ++i){
 		delete i->second;
 	}
 
@@ -417,18 +420,18 @@ void IniFile::release()
 bool IniFile::isComment(const string &str)
 {
 	bool ret =false;
-	for(int i = 0; i < flags_.size(); ++i){
+	for (int i = 0; i < flags_.size(); ++i){
 		int k = 0;
-		if(str.length() < flags_[i].length()){
+		if (str.length() < flags_[i].length()){
 			continue;
 		}
-		for(k = 0;k < flags_[i].length(); ++k){
-			if(str[k] != flags_[i][k]){
+		for (k = 0;k < flags_[i].length(); ++k){
+			if (str[k] != flags_[i][k]){
 				break;
 			}
 		}
 
-		if(k == flags_[i].length()){
+		if (k == flags_[i].length()){
 			ret = true;
 			break;
 		}
@@ -442,19 +445,75 @@ void IniFile::print()
 	printf("filename:[%s]\n",fname_.c_str());
 
 	printf("flags_:[");
-	for(int i = 0; i < flags_.size(); ++i){
+	for (int i = 0; i < flags_.size(); ++i){
 		printf(" %s ",flags_[i].c_str());
 	}
 	printf("]\n");
 
-	for(iterator it = sections_.begin(); it != sections_.end(); ++it){
+	for (iterator it = sections_.begin(); it != sections_.end(); ++it){
 		printf("section:[%s]\n",it->first.c_str());
 		printf("comment:[%s]\n",it->second->comment.c_str());
-		for(IniSection::iterator i = it->second->items.begin(); i != it->second->items.end(); ++i){
+		for (IniSection::iterator i = it->second->items.begin(); i != it->second->items.end(); ++i){
 			printf("    comment:%s\n",i->comment.c_str());
 			printf("    parm   :%s=%s\n",i->key.c_str(),i->value.c_str());
 		}
 	}
+}
+
+void IniFile::trimleft(string &str,char c/*=' '*/)
+{
+	//trim head
+
+	int len = str.length();
+
+	int i = 0;
+	while (str[i] == c && str[i] != '\0'){
+		i++;
+	}
+	if (i != 0){
+		str = string(str,i,len-i);
+	}
+}
+
+void IniFile::trimright(string &str,char c/*=' '*/)
+{
+	//trim tail
+	int i = 0;
+	int len = str.length();
+		
+	
+	for (i = len - 1; i >= 0; --i ){
+		if (str[i] != c){
+			break;
+		}
+	}
+
+	str = string(str,0,i+1);
+}
+
+void IniFile::trim(string &str)
+{
+	//trim head
+
+	int len = str.length();
+
+	int i = 0;
+	while (isspace(str[i]) && str[i] != '\0'){
+		i++;
+	}
+	if (i != 0){
+		str = string(str,i,len-i);
+	}
+
+	//trim tail
+	len = str.length();
+
+	for (i = len - 1; i >= 0; --i ){
+		if (!isspace(str[i])){
+			break;
+		}
+	}
+	str = string(str,0,i+1);
 }
 }
 #endif

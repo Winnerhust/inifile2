@@ -1,57 +1,55 @@
 #include <iostream>
 #include <gtest/gtest.h>
 #include "inifile.h"
-#include "stringutil.h"
 
 using namespace std;
-using namespace stringutil;
 using namespace inifile;
 
-TEST(stringutil,trim)
+TEST(inifile,trim)
 {
 	string buf = "   aaa    ";
-	trim(buf);
+    IniFile::trim(buf);
 
 	EXPECT_EQ(buf,string("aaa"));
 
 	buf =  "   aaa";
-	trim(buf);
+    IniFile::trim(buf);
 	EXPECT_EQ(buf,string("aaa"));
 
 	buf =  "aaa    ";
-	trim(buf);
+    IniFile::trim(buf);
 	EXPECT_EQ(buf,string("aaa"));
 }
 
-TEST(stringutil,trimleft)
+TEST(inifile,trimleft)
 {
 	string p = "   aaa    ";
-	trimleft(p);
+	IniFile::trimleft(p);
 
 	EXPECT_EQ(p,string("aaa    "));
 
 	p =  "   aaa";
-	trimleft(p);
+	IniFile::trimleft(p);
 	EXPECT_EQ(p,string("aaa"));
 
 	p = "aaa    ";
-	trimleft(p);
+	IniFile::trimleft(p);
 	EXPECT_EQ(p,string("aaa    "));
 }
 
-TEST(stringutil,trimright)
+TEST(inifile,trimright)
 {
 	string p = "   aaa    ";
-	trimright(p);
+	IniFile::trimright(p);
 	
 	EXPECT_EQ(p,string("   aaa"));
 
 	p =  "   aaa";
-	trimright(p);
+	IniFile::trimright(p);
 	EXPECT_EQ(p,string("   aaa"));
 
 	p = "aaa    ";
-	trimright(p);
+	IniFile::trimright(p);
 	EXPECT_EQ(p,string("aaa"));
 }
 
@@ -107,28 +105,28 @@ TEST(IniFile,getline)
 	fp = fopen(filepath,"r");
 
 	ini.getline(line,fp);
-	trimright(line,'\n');
-	trimright(line,'\r');
-	trim(line);
+	IniFile::trimright(line,'\n');
+	IniFile::trimright(line,'\r');
+    IniFile::trim(line);
 	EXPECT_EQ(line,"USER=root");
 	
 	ini.getline(line,fp);
-	trimright(line,'\n');
-	trimright(line,'\r');
-	trim(line);
+	IniFile::trimright(line,'\n');
+	IniFile::trimright(line,'\r');
+    IniFile::trim(line);
 	EXPECT_EQ(line,"[COMMON]");
 	
 	ini.getline(line,fp);
-	trimright(line,'\n');
-	trimright(line,'\r');
-	trim(line);
+	IniFile::trimright(line,'\n');
+	IniFile::trimright(line,'\r');
+    IniFile::trim(line);
 	EXPECT_EQ(line,"DB=sys");
 	
 	ini.getline(line,fp);
 	ini.getline(line,fp);
-	trimright(line,'\n');
-	trimright(line,'\r');
-	trim(line);
+	IniFile::trimright(line,'\n');
+	IniFile::trimright(line,'\r');
+    IniFile::trim(line);
 	EXPECT_EQ(line,"#commit");
 	fclose(fp);
 }
@@ -305,11 +303,11 @@ TEST(IniFile,deleteKey)
 
 }
 
-#ifdef GTEST_MAIN
+//#ifdef GTEST_MAIN
 int main(int argc, char* argv[])
 {
     testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
 }
 
-#endif
+//#endif

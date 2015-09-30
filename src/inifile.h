@@ -83,6 +83,14 @@ public:
 	void deleteSection(const string &section);
 	/*删除特定段的特定参数*/
 	void deleteKey(const string &section,const string &key);
+public:
+	/*去掉str后面的c字符*/
+	static void trimleft(string &str,char c=' ');
+	/*去掉str前面的c字符*/
+	static void trimright(string &str,char c=' ');
+	/*去掉str前面和后面的空格符,Tab符等空白符*/
+	static void trim(string &str);
+	/*将字符串str按分割符delim分割成多个子串*/
 private:
 	IniSection *getSection(const string &section="");
 	void release();
@@ -91,12 +99,12 @@ private:
 	bool parse(const string &content,string &key,string &value,char c= '=');
 	//for dubug
 	void print();
+
 private:
 	map<string,IniSection *> sections_;
 	string fname_;
 	vector<string> flags_;
 };
-
 }
 
 #endif
