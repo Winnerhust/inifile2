@@ -420,8 +420,8 @@ void IniFile::release()
 bool IniFile::isComment(const string &str)
 {
 	bool ret =false;
-	for (int i = 0; i < flags_.size(); ++i){
-		int k = 0;
+	for (size_t i = 0; i < flags_.size(); ++i){
+		size_t k = 0;
 		if (str.length() < flags_[i].length()){
 			continue;
 		}
@@ -445,7 +445,7 @@ void IniFile::print()
 	printf("filename:[%s]\n",fname_.c_str());
 
 	printf("flags_:[");
-	for (int i = 0; i < flags_.size(); ++i){
+	for (size_t i = 0; i < flags_.size(); ++i){
 		printf(" %s ",flags_[i].c_str());
 	}
 	printf("]\n");

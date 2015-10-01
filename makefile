@@ -1,5 +1,5 @@
 
-CC=g++
+CC=g++ -Wall
 GTEST_CPPFLAGS=-I${GTEST_DIR}/include -pthread 
 GTEST_LDFLAGS=-L${GTEST_DIR}/lib -lgtest -pthread
 
