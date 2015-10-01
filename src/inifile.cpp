@@ -81,7 +81,7 @@ int IniFile::getline(string &str,FILE *fp)
 	return str.length();
 
 }
-int IniFile::open(const string &filename)
+int IniFile::load(const string &filename)
 {	
 	release();
 	fname_ = filename;

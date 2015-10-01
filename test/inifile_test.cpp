@@ -141,7 +141,7 @@ TEST(IniFile,hasSection_and_getValue)
 
 	//test
 	IniFile ini;
-	ini.open(filepath);
+	ini.load(filepath);
 	/*cout<<"---------------\n"<<endl;
 	ini.print();
 	cout<<"---------------\n"<<endl;
@@ -174,7 +174,7 @@ TEST(IniFile,reopen)
 
 	//test
 	IniFile ini;
-	ini.open(filepath);
+	ini.load(filepath);
 
 	//reopen
 	
@@ -184,7 +184,7 @@ TEST(IniFile,reopen)
 	fclose(fp);
 
 	//test
-	ini.open(filepath);
+	ini.load(filepath);
 	
 	EXPECT_EQ(ini.hasSection(""),true);
 	EXPECT_EQ(ini.hasSection("COMMON"),true);
@@ -211,7 +211,7 @@ TEST(IniFile,saveas)
 
 	//test
 	IniFile ini;
-	ini.open(filepath);
+	ini.load(filepath);
 	
 	char saveas_path[] = "test/test_save_as.ini";
 	
@@ -257,7 +257,7 @@ TEST(IniFile,deleteSection)
 
 	//test
 	IniFile ini;
-	ini.open(filepath);
+	ini.load(filepath);
 		
 	ini.deleteSection("COMMON");
 
@@ -285,7 +285,7 @@ TEST(IniFile,deleteKey)
 
 	//test
 	IniFile ini;
-	ini.open(filepath);
+	ini.load(filepath);
 		
 	ini.deleteKey("COMMON","DB");
 

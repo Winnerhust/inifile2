@@ -42,7 +42,7 @@ public:
 	iterator end() {return sections_.end();}
 public:
 	/* 打开并解析一个名为fname的INI文件 */
-	int open(const string &fname);
+	int load(const string &fname);
 	/*将内容保存到当前文件*/
 	int save();
 	/*将内容另存到一个名为fname的文件*/

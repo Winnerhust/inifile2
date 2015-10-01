@@ -28,7 +28,7 @@ using namespace inifile;
 filepath = "test.ini";
 
 IniFile ini;
-ini.open(filepath);
+ini.load(filepath);
 
 //获取指定段的指定项的值
 int ret = 0;
