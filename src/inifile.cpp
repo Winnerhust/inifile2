@@ -29,6 +29,8 @@ bool IniFile::parse(const string &content, string &key, string &value, char c/*=
     if (i >= 0 && i < len) {
         key = string(content.c_str(), i);
         value = string(content.c_str() + i + 1, len - i - 1);
+        trim(key);
+        trim(value);
         return true;
     }
 
