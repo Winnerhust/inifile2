@@ -15,10 +15,11 @@ const string delim = "\n";
 struct IniItem {
     string key;
     string value;
-    string comment;
+    string comment;//每个键的注释，都是指该行上方的内容
+    string right_comment;
 };
 struct IniSection {
-    typedef vector<IniItem>::iterator iterator;
+    typedef vector<IniItem>::iterator iterator;//定义一个迭代器，即指向键元素的指针
     iterator begin() {
         return items.begin();
     }
@@ -27,8 +28,9 @@ struct IniSection {
     }
 
     string name;
-    string comment;
-    vector<IniItem> items;
+    string comment;//每个段的注释，都是指该行上方的内容
+    string right_comment;
+    vector<IniItem> items;//键值项数组，一个段可以有多个键值
 };
 
 class IniFile
@@ -105,11 +107,11 @@ private:
     int getline(string &str, FILE *fp);
     bool isComment(const string &str);
     bool parse(const string &content, string &key, string &value, char c = '=');
-    //for dubug
+    //for debug
     void print();
 
 private:
-    map<string, IniSection *> sections_;
+    map<string, IniSection *> sections_;//用于存储段集合的map容器
     string fname_;
     vector<string> flags_;
 };
