@@ -17,7 +17,7 @@ mytest: src/inifile.cpp test/mytest.cpp test/inifile_test.cpp
 	$(CC) -g -o mytest mytest.o inifile.o $(GTEST_LDFLAGS) 
 	$(CC) -g -o error error.o inifile.o $(GTEST_LDFLAGS) 
 clean:	
-	rm -f *.o testcase
+	rm -f *.o testcase mytest
 
 
 

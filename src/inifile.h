@@ -19,11 +19,11 @@ struct IniItem {
     string right_comment;
 };
 struct IniSection {
-    typedef vector<IniItem>::iterator iterator;//定义一个迭代器，即指向键元素的指针
-    iterator begin() {
+    typedef vector<IniItem>::iterator vector_it;//定义一个迭代器，即指向键元素的指针
+    vector_it begin() {
         return items.begin();
     }
-    iterator end() {
+    vector_it end() {
         return items.end();
     }
 
@@ -42,13 +42,13 @@ public:
     }
 
 public:
-    typedef map<string, IniSection *>::iterator iterator;
+    typedef map<string, IniSection *>::iterator map_it;
 
-    iterator begin() {
-        return sections_.begin();
+    map_it begin() {
+        return sections_map.begin();
     }
-    iterator end() {
-        return sections_.end();
+    map_it end() {
+        return sections_map.end();
     }
 public:
     /* 打开并解析一个名为fname的INI文件 */
@@ -111,7 +111,7 @@ private:
     void print();
 
 private:
-    map<string, IniSection *> sections_;//用于存储段集合的map容器
+    map<string, IniSection *> sections_map;//用于存储段集合的map容器
     string fname_;
     vector<string> flags_;
 };
