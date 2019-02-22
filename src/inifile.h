@@ -44,12 +44,6 @@ public:
 public:
     typedef map<string, IniSection *>::iterator map_it;
 
-    map_it begin() {
-        return sections_map.begin();
-    }
-    map_it end() {
-        return sections_map.end();
-    }
 public:
     /* 打开并解析一个名为fname的INI文件 */
     int load(const string &fname);
