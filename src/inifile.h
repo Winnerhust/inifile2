@@ -3,6 +3,7 @@
 
 #include <map>
 #include <vector>
+#include <algorithm>
 #include <string>
 #include <string.h>
 
@@ -19,18 +20,18 @@ struct IniItem {
     string right_comment;
 };
 struct IniSection {
-    typedef vector<IniItem>::iterator vector_it;//定义一个迭代器，即指向键元素的指针
-    vector_it begin() {
-        return items.begin();
+    typedef vector<IniItem>::iterator IniItem_it;//定义一个迭代器，即指向键元素的指针
+    IniItem_it begin() {
+        return items.begin();//段结构体的begin元素指向items的头指针
     }
-    vector_it end() {
-        return items.end();
+    IniItem_it end() {
+        return items.end();//段结构体的begin元素指向items的尾指针
     }
 
     string name;
     string comment;//每个段的注释，都是指该行上方的内容
     string right_comment;
-    vector<IniItem> items;//键值项数组，一个段可以有多个键值
+    vector<IniItem> items;//键值项数组，一个段可以有多个键值，所有用vector来储存
 };
 
 class IniFile
@@ -43,6 +44,7 @@ public:
 
 public:
     typedef map<string, IniSection *>::iterator map_it;
+    typedef vector<IniSection *>::iterator IniSection_it;
 
 public:
     /* 打开并解析一个名为fname的INI文件 */
@@ -106,6 +108,7 @@ private:
 
 private:
     map<string, IniSection *> sections_map;//用于存储段集合的map容器
+    vector<IniSection *> sections_vt;//用于存储段集合的vector容器
     string fname_;
     vector<string> flags_;
 };

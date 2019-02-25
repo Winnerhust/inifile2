@@ -8,19 +8,19 @@ all: testcase mytest
 
 testcase:
 	$(CC) $(GTEST_CPPFLAGS) $(CPPFLAGS) -g -c src/inifile.cpp
-	# $(CC) $(GTEST_CPPFLAGS) $(CPPFLAGS) -g -c test/inifile_test.cpp 
-	# $(CC) -g -o testcase inifile_test.o inifile.o $(GTEST_LDFLAGS) 
-mytest: src/inifile.cpp test/mytest.cpp test/inifile_test.cpp 
+	# $(CC) $(GTEST_CPPFLAGS) $(CPPFLAGS) -g -c test/inifile_test.cpp
+	# $(CC) -g -o testcase inifile_test.o inifile.o $(GTEST_LDFLAGS)
+mytest: src/inifile.cpp test/mytest.cpp test/inifile_test.cpp test/error.cpp
 	$(CC) $(GTEST_CPPFLAGS) $(CPPFLAGS) -g -c src/inifile.cpp
-	$(CC) $(GTEST_CPPFLAGS) $(CPPFLAGS) -g -c test/mytest.cpp  
-	$(CC) $(GTEST_CPPFLAGS) $(CPPFLAGS) -g -c test/error.cpp  
-	$(CC) -g -o mytest mytest.o inifile.o $(GTEST_LDFLAGS) 
-	$(CC) -g -o error error.o inifile.o $(GTEST_LDFLAGS) 
-clean:	
+	$(CC) $(GTEST_CPPFLAGS) $(CPPFLAGS) -g -c test/mytest.cpp
+	$(CC) $(GTEST_CPPFLAGS) $(CPPFLAGS) -g -c test/error.cpp
+	$(CC) -g -o mytest mytest.o inifile.o $(GTEST_LDFLAGS)
+	$(CC) -g -o error error.o inifile.o $(GTEST_LDFLAGS)
+clean:
 	rm -f *.o testcase mytest
 
 
 
-	
+
 #	g++  $(gtest-config --cppflags --cxxflags) -o $(TARGET).o -c test_main.cpp
 #	g++ $(gtest-config --ldflags --libs) -o $(TARGET) $(TARGET).o

@@ -5,7 +5,7 @@ using namespace inifile;
 
 int main()
 {
-	string filepath = "error.ini";
+	string filepath = "test/error.ini";
 
 	inifile::IniFile ini;
 
@@ -24,6 +24,6 @@ int main()
     ini.print();
     // ret = ini.setValue("TEST","NAME","root", "user");
     // 保存到文件
-    // ini.save();
+    ini.saveas("test/new.ini");
 }
 

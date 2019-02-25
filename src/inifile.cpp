@@ -117,10 +117,6 @@ int IniFile::load(const string &filename)
     string comment;
     string right_comment;
 
-    //增加默认段
-    // section = new IniSection();//为字段分配内存
-    // sections_map[""] = section;//sections_map是map容器，将section放入容器，这句代码会造成一个空的段，故弃用
-
     //每次读取一行内容到line
     while (getline(line, fp) > 0) {
 
@@ -142,6 +138,7 @@ int IniFile::load(const string &filename)
             continue;
         }
 
+		//step 1
 		//如果行首不是注释，查找行尾是否存在注释
         if (!isComment(line)) {
             /* 针对 “value=1 #测试” 这种后面有注释的语句
@@ -159,7 +156,7 @@ int IniFile::load(const string &filename)
 				//截取从0位置到发现注释字符的位置，即只取出键名和键值，存入subline
                 subline = line.substr(0, line.find(flags_[i]));
                 trim(subline);
-                line = subline;//已去掉注释，更新line
+                line = subline;//已去掉注释，更新line，交给step 2处理
             }
 			//从oldline取出注释内容，放入comment
 			string line_comment;
@@ -173,6 +170,7 @@ int IniFile::load(const string &filename)
             }
         }
 
+		//step 2
 		//对line进行整理，去掉首尾的空格符
         trim(line);
 
@@ -208,13 +206,14 @@ int IniFile::load(const string &filename)
                 return -1;
             }
 
-			//申请一个新段，注意map容器是无序的，所以用s值(段名)作为下标，并且唯一
+			//申请一个新段，由于map容器会自动排序，打乱原有顺序，因此改用vector存储
             section = new IniSection();
-            sections_map[s] = section;
+
+			sections_vt.push_back(section);
 
 			//填充段名
             section->name = s;
-            printf("section name = %s\n", s);
+            printf("[%s]: section name = %s\n", __func__, s.c_str());
 			//填充段开头的注释
             section->comment = comment;
             section->right_comment = right_comment;
@@ -268,24 +267,26 @@ int IniFile::saveas(const string &filename)
 {
     string data = "";
 
-    for (map_it sect = sections_map.begin(); sect != sections_map.end(); ++sect) {
-        if (sect->second->comment != "") {
-            data += sect->second->comment;
+	/* 载入section数据 */
+    for (IniSection_it sect = sections_vt.begin(); sect != sections_vt.end(); ++sect) {
+        if ((*sect)->comment != "") {
+            data += (*sect)->comment;
             if(data[data.length()-1] != '\n')
            		data += delim;
         }
 
-        if (sect->first != "") {
-            data += string("[") + sect->first + string("]");
+        if ((*sect)->name != "") {
+            data += string("[") + (*sect)->name + string("]");
         }
 
-        if (sect->second->right_comment != "") {
-            data += sect->second->right_comment;
+        if ((*sect)->right_comment != "") {
+            data += (*sect)->right_comment;
         }
         if(data[data.length()-1] != '\n')
             data += delim;
 
-        for (IniSection::vector_it item = sect->second->items.begin(); item != sect->second->items.end(); ++item) {
+		/* 载入item数据 */
+        for (IniSection::IniItem_it item = (*sect)->items.begin(); item != (*sect)->items.end(); ++item) {
             if (item->comment != "") {
                 data += item->comment;
                 if(data[data.length()-1] != '\n')
@@ -314,12 +315,11 @@ int IniFile::saveas(const string &filename)
 //从容器sections_map中查找section的指针位置
 IniSection *IniFile::getSection(const string &section /*=""*/)
 {
-    map_it it = sections_map.find(section);
-
-	//找到了，返回second，即容器sections_map 中的 IniSection
-    if (it != sections_map.end()) {
-        return it->second;
-    }
+	for (IniSection_it it = sections_vt.begin(); it != sections_vt.end(); ++it) {
+		if ((*it)->name == section) {
+			return *it;
+		}
+	}
 
     return NULL;
 }
@@ -362,7 +362,7 @@ int IniFile::getValue(const string &section, const string &key, string &value, s
     IniSection *sect = getSection(section);
 
     if (sect != NULL) {
-        for (IniSection::vector_it it = sect->begin(); it != sect->end(); ++it) {
+        for (IniSection::IniItem_it it = sect->begin(); it != sect->end(); ++it) {
             if (it->key == key) {
                 value = it->value;
                 comment = it->comment;
@@ -389,7 +389,7 @@ int IniFile::getValues(const string &section, const string &key,
     IniSection *sect = getSection(section);
 
     if (sect != NULL) {
-        for (IniSection::vector_it it = sect->begin(); it != sect->end(); ++it) {
+        for (IniSection::IniItem_it it = sect->begin(); it != sect->end(); ++it) {
             if (it->key == key) {
                 value = it->value;
                 comment = it->comment;
@@ -414,7 +414,7 @@ bool IniFile::hasKey(const string &section, const string &key)
     IniSection *sect = getSection(section);
 
     if (sect != NULL) {
-        for (IniSection::vector_it it = sect->begin(); it != sect->end(); ++it) {
+        for (IniSection::IniItem_it it = sect->begin(); it != sect->end(); ++it) {
             if (it->key == key) {
                 return true;
             }
@@ -459,6 +459,7 @@ int IniFile::setValue(const string &section, const string &key,
     }
 
     if (sect == NULL) {
+		//如果段不存在
         sect = new IniSection();
 
         if (sect == NULL) {
@@ -467,10 +468,12 @@ int IniFile::setValue(const string &section, const string &key,
         }
 
         sect->name = section;
-        sections_map[section] = sect;
+        // sections_map[section] = sect;
+
+		sections_vt.push_back(sect);
     }
 
-    for (IniSection::vector_it it = sect->begin(); it != sect->end(); ++it) {
+    for (IniSection::IniItem_it it = sect->begin(); it != sect->end(); ++it) {
         if (it->key == key) {
             it->value = value;
             it->comment = comt;
@@ -499,20 +502,22 @@ void IniFile::setCommentFlags(const vector<string> &flags)
 }
 void IniFile::deleteSection(const string &section)
 {
-    IniSection *sect = getSection(section);
-
-    if (sect != NULL) {
-
-        sections_map.erase(section);
-        delete sect;
-    }
+	for (IniSection_it it = sections_vt.begin(); it != sections_vt.end(); ) {
+		if ((*it)->name == section) {
+			delete *it;
+			it = sections_vt.erase(it);
+			break;
+		}
+		else
+			it++;
+	}
 }
 void IniFile::deleteKey(const string &section, const string &key)
 {
     IniSection *sect = getSection(section);
 
     if (sect != NULL) {
-        for (IniSection::vector_it it = sect->begin(); it != sect->end(); ++it) {
+        for (IniSection::IniItem_it it = sect->begin(); it != sect->end(); ++it) {
             if (it->key == key) {
                 sect->items.erase(it);
                 break;
@@ -533,11 +538,12 @@ void IniFile::release()
 {
     fname_ = "";
 
-    for (map_it i = sections_map.begin(); i != sections_map.end(); ++i) {
-        delete i->second;
+    for (IniSection_it it = sections_vt.begin(); it != sections_vt.end(); ++it) {
+		// (*it)->items.clear();//清除items容器,vector容器会自动销毁
+        delete (*it);//清除section
     }
 
-    sections_map.clear();
+    sections_vt.clear();
 
 }
 
@@ -593,19 +599,20 @@ void IniFile::print()
 
     printf("]\n");
 
-    for (map_it it = sections_map.begin(); it != sections_map.end(); ++it) {
-        printf("section:[%s]\n", it->first.c_str());
-        printf("comment:[%s]\n", it->second->comment.c_str());
-        if(it->second->right_comment!="")
-            printf("rcomment:\n%s", it->second->right_comment.c_str());
+    for (IniSection_it it = sections_vt.begin(); it != sections_vt.end(); ++it) {
+        printf("section:\n[%s]\n", (*it)->name.c_str());
+        printf("comment:[\n%s]\n", (*it)->comment.c_str());
+        if((*it)->right_comment!="")
+            printf("rcomment:\n%s", (*it)->right_comment.c_str());
 
-        for (IniSection::vector_it i = it->second->items.begin(); i != it->second->items.end(); ++i) {
+        for (IniSection::IniItem_it i = (*it)->items.begin(); i != (*it)->items.end(); ++i) {
             printf("    comment:%s\n", i->comment.c_str());
             printf("    parm   :%s=%s\n", i->key.c_str(), i->value.c_str());
             if(i->right_comment!="")
                 printf("    rcomment:[%s]\n", i->right_comment.c_str());
         }
     }
+
 }
 
 void IniFile::trimleft(string &str, char c/*=' '*/)
