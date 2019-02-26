@@ -332,8 +332,6 @@ int IniFile::saveas(const string &filename)
 
     return 0;
 }
-
-//从容器sections_map中查找section的指针位置
 IniSection *IniFile::getSection(const string &section /*=""*/)
 {
 	for (IniSection_it it = sections_vt.begin(); it != sections_vt.end(); ++it) {
@@ -619,16 +617,16 @@ void IniFile::print()
     printf("]\n");
 
     for (IniSection_it it = sections_vt.begin(); it != sections_vt.end(); ++it) {
-        printf("section:\n[%s]\n", (*it)->name.c_str());
-        printf("comment:[\n%s]\n", (*it)->comment.c_str());
+        printf("comment :[\n%s]\n", (*it)->comment.c_str());
+        printf("section :\n[%s]\n", (*it)->name.c_str());
         if((*it)->right_comment!="")
             printf("rcomment:\n%s", (*it)->right_comment.c_str());
 
         for (IniSection::IniItem_it i = (*it)->items.begin(); i != (*it)->items.end(); ++i) {
-            printf("    comment:%s\n", i->comment.c_str());
-            printf("    parm   :%s=%s\n", i->key.c_str(), i->value.c_str());
+            printf("    comment :[\n%s]\n", i->comment.c_str());
+            printf("    parm    :%s=%s\n", i->key.c_str(), i->value.c_str());
             if(i->right_comment!="")
-                printf("    rcomment:[%s]\n", i->right_comment.c_str());
+                printf("    rcomment:[\n%s]\n", i->right_comment.c_str());
         }
     }
 
