@@ -15,7 +15,10 @@ const int RET_ERR = -1;
 const string delim = "\n";
 struct IniItem {
     string key;
+	string blank1;
+	string blank2;
     string value;
+	string blank3;
     string comment;//每个键的注释，都是指该行上方的内容
     string right_comment;
 };
@@ -101,8 +104,9 @@ private:
     IniSection *getSection(const string &section = "");
     void release();
     int getline(string &str, FILE *fp);
+	size_t split(string &str, string &left_str, string &right_str, string &seperator);
     bool isComment(const string &str);
-    bool parse(const string &content, string &key, string &value, char c = '=');
+    bool parse(const string &content, string &key, string &blank1, string &blank2, string &value, string &blank3, char c = '=');
     //for debug
     void print();
 

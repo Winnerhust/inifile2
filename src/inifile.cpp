@@ -4,10 +4,14 @@
 #include "inifile.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <iostream>
 #include <ctype.h>
+
+using namespace std;
 
 namespace inifile
 {
+	// using namespace std;
 
 int INI_BUF_SIZE = 2048;
 
@@ -31,19 +35,43 @@ IniFile::IniFile()
  * @return  bool
  */
 /* ----------------------------------------------------------------------------*/
-bool IniFile::parse(const string &content, string &key, string &value, char c/*= '='*/)
+bool IniFile::parse(const string &content, string &key, string &blank1, string &blank2, string &value, string &blank3, char c/*= '='*/)
 {
     int i = 0;
     int len = content.length();
-	//找到'='的位置
-    while (i < len && content[i] != c) {
-        ++i;
-    }
-
+	size_t pos_eq = content.find_first_of(c);//找到'='的位置
+	size_t pb1, pb2, pb3;//position of blank 1 /2 /3
+	// cout<<__func__<<":pos_eq = "<<pos_eq<<endl;
+	// 找到'='的位置
+    // while (i < len && content[i] != c) {
+        // ++i;
+    // }
+	// cout<<__func__<<":i = "<<i<<endl;
 	//通过i和len确认有key和value
     if (i >= 0 && i < len) {
-        key = string(content.c_str(), i);
-        value = string(content.c_str() + i + 1, len - i - 1);
+        // key = string(content.c_str(), i);
+        // value = string(content.c_str() + i + 1, len - i - 1);//content.c_str() + i + 1是个指针偏移;
+        key = string(content, 0, pos_eq);//pos_eq为key长度，包含key右边的空格
+		value = string(content, pos_eq + 1);//截取=号右边的字符, pos_eq为=号位置
+
+		//a = b #, key = a_, value = _b_，其中_代表空格
+
+		pb1 = key.find_last_not_of(" ");
+		blank1 = string(key, pb1 + 1);//pb1为key最后的非空字符，则pb1+1为key的空白起始位置
+		pb2 = value.find_first_not_of(" ");//pb2为value第一个非空字符位置，等于blank2长度
+		pb3 = value.find_last_not_of(" ");
+		blank2 = string(value, 0, pb2);
+		blank3 = string(value, pb3 + 1);//pb3为value倒数找到第第一个非空字符，则pb3+1为blank3起始位置
+
+		// cout<<__func__<<":content = "<<content<<"end"<<endl;
+		// cout<<__func__<<":key="<<key<<"]"<<endl;
+		// cout<<__func__<<":blank1="<<blank1<<"]"<<endl;
+		// cout<<__func__<<":pb1="<<pb1<<endl;
+		// cout<<__func__<<":value="<<value<<"]"<<endl;
+		// cout<<__func__<<":blank2="<<blank2<<"]"<<endl;
+		// cout<<__func__<<":blank3="<<blank3<<"]"<<endl;
+		// cout<<__func__<<":pb2="<<pb2<<endl;
+		// cout<<__func__<<":pb3="<<pb3<<endl;
         return true;
     }
 
@@ -141,38 +169,29 @@ int IniFile::load(const string &filename)
 		//step 1
 		//如果行首不是注释，查找行尾是否存在注释
         if (!isComment(line)) {
-            /* 针对 “value=1 #测试” 这种后面有注释的语句
-             * 重新分割line，并添加注释到commnet
-             * 注意：这种情况保存后会变成
-             * #测试
-             * value=1
-             * */
-            string subline;//临时行，存放从line取出的部分
-            string oldline = line;
+			string leftstr="", rightstr="";
 
 			//去掉注释，也有可能行尾没有注释，此时不会影响原数据
             for (size_t i = 0; i < flags_.size(); ++i) {
-				//line.find： 找到注释位置，如果没有，返回line自身长度
-				//截取从0位置到发现注释字符的位置，即只取出键名和键值，存入subline
-                subline = line.substr(0, line.find(flags_[i]));
-                trim(subline);
-                line = subline;//已去掉注释，更新line，交给step 2处理
+				if (split(line, leftstr, rightstr, flags_[i]) != string::npos){
+					line = leftstr;//更新line，只含数据不含注释
+					cout<<"leftstr = "<<line<<endl;
+					cout<<"rightstr = "<<rightstr<<endl;
+					break;
+				}
             }
-			//从oldline取出注释内容，放入comment
-			string line_comment;
-			line_comment = oldline.substr(subline.length());
-
-			if(line_comment.length())
+			//取出注释内容rightstr，放入right_comment
+			if(rightstr.length())
             {
-                // comment += line_comment + delim;
-                right_comment += line_comment + delim;
+				// comment += line_comment + delim;
+                right_comment += rightstr + delim;
             	//cout<<"debug: found comment after sec/key\n";
             }
         }
 
 		//step 2
-		//对line进行整理，去掉首尾的空格符
-        trim(line);
+		//对line进行整理，去掉开头的空格符
+        trimleft(line);
 
         //判断line内容是否为段或键
 		//段开头
@@ -180,9 +199,9 @@ int IniFile::load(const string &filename)
 
             section = NULL;
 			//查找右中括号
-            int index = line.find_first_of(']');
+            size_t index = line.find_first_of(']');
 
-            if (index == -1) {
+            if (index == string::npos) {
                 fclose(fp);
                 fprintf(stderr, "没有找到匹配的]\n");
                 return -1;
@@ -206,10 +225,9 @@ int IniFile::load(const string &filename)
                 return -1;
             }
 
-			//申请一个新段，由于map容器会自动排序，打乱原有顺序，因此改用vector存储
+			//申请一个新段，由于map容器会自动排序，打乱原有顺序，因此改用vector存储（sections_vt）
             section = new IniSection();
-
-			sections_vt.push_back(section);
+            sections_vt.push_back(section);
 
 			//填充段名
             section->name = s;
@@ -221,20 +239,18 @@ int IniFile::load(const string &filename)
             comment = "";
             right_comment = "";
 
-		//如果该行以注释开头
+		//如果该行以注释开头，添加到comment
         } else if (isComment(line)) {
-        	//cout<<"\nyes\n";
+            //cout<<"\nisComment = yes\n";
             comment += line + delim;
-            //cout<<"comment="<<comment;
+            cout<<"comment=\n"<<comment;
 
 		//如果该行是键值
         } else {
+            trimleft(line);
+            string key, blank1, blank2, value, blank3;
 
-        	trim(line);
-
-            string key, value;
-
-            if (parse(line, key, value)==true) {
+            if (parse(line, key, blank1, blank2, value, blank3)==true) {
                 IniItem item;
                 trim(key);//clear blank
                 trim(value);//clear blank
@@ -242,6 +258,11 @@ int IniFile::load(const string &filename)
                 item.value = value;
                 item.comment = comment;
                 item.right_comment = right_comment;
+				item.blank1 = blank1;
+				item.blank2 = blank2;
+				item.blank3 = blank3;
+				cout<<"item.comment="<<comment<<endl;
+				cout<<"item.right_comment="<<right_comment<<endl;
 
                 section->items.push_back(item);
             } else {
@@ -293,7 +314,7 @@ int IniFile::saveas(const string &filename)
                     data += delim;
             }
 
-            data += item->key + "=" + item->value;
+            data += item->key + item->blank1 + "=" + item->blank2 + item->value + item->blank3 ;
 
             if (item->right_comment != "") {
                 data += item->right_comment;
@@ -459,7 +480,7 @@ int IniFile::setValue(const string &section, const string &key,
     }
 
     if (sect == NULL) {
-		//如果段不存在
+		//如果段不存在，新建一个
         sect = new IniSection();
 
         if (sect == NULL) {
@@ -468,8 +489,6 @@ int IniFile::setValue(const string &section, const string &key,
         }
 
         sect->name = section;
-        // sections_map[section] = sect;
-
 		sections_vt.push_back(sect);
     }
 
@@ -682,5 +701,25 @@ void IniFile::trim(string &str)
 
     str = string(str, 0, i + 1);
 }
+/*-------------------------------------------------------------------------*/
+/**
+  @brief    split，用分隔符切割字符串
+  @param    seperator 一个分隔符
+  @return   pos
+ */
+/*--------------------------------------------------------------------------*/
+size_t IniFile::split(string &str, string &left_str, string &right_str, string &seperator)
+{
+	size_t pos = str.find(seperator);
+    size_t len = str.length();
+	if(pos != string::npos)
+	{
+		// cout<<"pos ="<<pos<<endl;
+		left_str = string(str, 0, pos);
+		right_str = string(str, pos, len - 1);
+	}
+	return pos;
 }
+
+}/* namespace inifile */
 #endif
