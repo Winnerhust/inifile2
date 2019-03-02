@@ -9,7 +9,10 @@ int main()
 
 	inifile::IniFile ini;
 
-	ini.load(filepath);
+	if(ini.load(filepath) == RET_ERR){
+        cout<<"load error\n";
+        return -1;
+    }
 
 	//获取指定段的指定项的值
 	string db_name;

@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <ctype.h>
+#include <fstream>
 
 using namespace std;
 
@@ -135,18 +136,18 @@ int IniFile::load(const string &filename)
     release();
     fname_ = filename;
     IniSection *section = NULL;//初始化一个字段指针
-    FILE *fp = fopen(filename.c_str(), "r");
-
-    if (fp == NULL) {
-        return -1;
-    }
 
     string line;
     string comment;
     string right_comment;
 
+    ifstream ifs(fname_);
+    if (!ifs.is_open()) {
+        cout << "open file failed\n";
+        return -1;
+    }
     //每次读取一行内容到line
-    while (getline(line, fp) > 0) {
+    while(std::getline(ifs, line)) {
 
 /*
 		int isLF = false;
@@ -202,7 +203,7 @@ int IniFile::load(const string &filename)
             size_t index = line.find_first_of(']');
 
             if (index == string::npos) {
-                fclose(fp);
+					ifs.close();
                 fprintf(stderr, "没有找到匹配的]\n");
                 return -1;
             }
@@ -220,7 +221,7 @@ int IniFile::load(const string &filename)
 
 			//检查段是否已存在
             if (getSection(s.c_str()) != NULL) {
-                fclose(fp);
+					ifs.close();
                 fprintf(stderr, "此段已存在:%s\n", s.c_str());
                 return -1;
             }
@@ -274,7 +275,7 @@ int IniFile::load(const string &filename)
         }
     }
 
-    fclose(fp);
+		ifs.close();
 
     return 0;
 }
@@ -324,11 +325,9 @@ int IniFile::saveas(const string &filename)
         }
     }
 
-    FILE *fp = fopen(filename.c_str(), "w");
-
-    fwrite(data.c_str(), 1, data.length(), fp);
-
-    fclose(fp);
+    ofstream ofs(filename);
+    ofs << data;
+    ofs.close();
 
     return 0;
 }
