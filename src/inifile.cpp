@@ -21,6 +21,11 @@ IniFile::IniFile()
 {
     flags_.push_back("#");
     flags_.push_back(";");
+    IniSection *section = NULL;//初始化一个字段指针
+    /*增加默认段，即 无名段""，避免执行setValue("", "NAME", "cxy", "")函数时，
+        会把无名段添加到sections_vt末尾 */
+    section = new IniSection();
+    sections_vt.push_back(section);
 }
 
 //解析一行数据，得到键值
@@ -135,21 +140,25 @@ int IniFile::load(const string &filename)
         cout << "open file failed\n";
         return -1;
     }
+
+    //增加默认段，即 无名段""
+    section = new IniSection();
+	sections_vt.push_back(section);
     //每次读取一行内容到line
     while(std::getline(ifs, line)) {
 
         trim(line);
 
 		//step 0，空行处理，如果长度为0，说明是空行，添加到comment，当作是注释的一部分
-        // if (line.length() <= 0) {
-	        // comment += delim;
-            // continue;
-        // }
+        if (line.length() <= 0) {
+            comment += delim;
+            continue;
+        }
 
 		//step 1
 		//如果行首不是注释，查找行尾是否存在注释
 		//如果该行以注释开头，添加到comment，跳过当前循环，continue
-        if (line.length() <= 0 || isComment(line)) {
+        if (isComment(line)) {
             comment += line + delim;
             cout<<"comment=\n"<<comment;
             continue;
@@ -266,19 +275,16 @@ int IniFile::saveas(const string &filename)
     for (IniSection_it sect = sections_vt.begin(); sect != sections_vt.end(); ++sect) {
         if ((*sect)->comment != "") {
             data += (*sect)->comment;
-            if(data[data.length()-1] != '\n')
-           		data += delim;
         }
 
         if ((*sect)->name != "") {
             data += string("[") + (*sect)->name + string("]");
+            data += delim;
         }
 
         if ((*sect)->right_comment != "") {
             data += (*sect)->right_comment;
         }
-        if(data[data.length()-1] != '\n')
-            data += delim;
 
 		/* 载入item数据 */
         for (IniSection::IniItem_it item = (*sect)->items.begin(); item != (*sect)->items.end(); ++item) {

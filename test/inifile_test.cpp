@@ -1,10 +1,15 @@
 #include <iostream>
-#include <gtest/gtest.h>
+#include <string>
+#include <limits.h>
+#include "gtest/gtest.h"
+#define private   public
+#define protected public
+
 #include "inifile.h"
 
 using namespace std;
 using namespace inifile;
-
+namespace {
 TEST(inifile, trim)
 {
     string buf = "   aaa    ";
@@ -59,30 +64,30 @@ TEST(IniFile, pasre)
 {
     IniFile section;
     string s = "DB=sys";
-    string key, value;
+    string key, b1, b2, value, b3;
 
-    EXPECT_EQ(section.parse(s.c_str(), key, value), true);
+    EXPECT_EQ(section.parse(s, key, b1, b2, value, b3), true);
     EXPECT_EQ(key, "DB");
     EXPECT_EQ(value, "sys");
 
     s = "DB";
     key = value = "";
 
-    EXPECT_EQ(section.parse(s.c_str(), key, value), false);
+    EXPECT_EQ(section.parse(s, key, b1, b2, value, b3), false);
     EXPECT_EQ(key, "");
     EXPECT_EQ(value, "");
 
     s = "DB=";
     key = value = "";
 
-    EXPECT_EQ(section.parse(s.c_str(), key, value), true);
+    EXPECT_EQ(section.parse(s, key, b1, b2, value, b3), true);
     EXPECT_EQ(key, "DB");
     EXPECT_EQ(value, "");
 
     s = "=sys";
     key = value = "";
 
-    EXPECT_EQ(section.parse(s.c_str(), key, value), true);
+    EXPECT_EQ(section.parse(s, key, b1, b2, value, b3), true);
     EXPECT_EQ(key, "");
     EXPECT_EQ(value, "sys");
 }
@@ -136,7 +141,7 @@ TEST(IniFile, hasSection_and_getValue)
     char filepath[] = "test/test.ini";
     FILE *fp = fopen(filepath, "w+");
     char content[] = " USER=root \r\n [COMMON] \n DB=sys   	\nPASSWD=tt   \n#commit   \n ;--------- \n[DEFINE] \nname=cxy\nvalue=1 #测试\n";
-    fwrite(content, 1, sizeof(content), fp);
+    fwrite(content, 1, strlen(content), fp);
     fclose(fp);
 
     //test
@@ -225,7 +230,7 @@ TEST(IniFile, saveas)
 
     fread(buf, sizeof(char), 200, fp);
     fclose(fp);
-    EXPECT_EQ(buf, string("USER=root\n[COMMON]\nDB=sys\nPASSWD=tt\n#commit\n;---------\n[DEFINE]\nname=cxy\n#测试\nvalue=1\n"));
+    EXPECT_EQ(buf, string("USER=root\n[COMMON]\nDB=sys\nPASSWD=tt\n#commit\n;---------\n[DEFINE]\nname=cxy\nvalue=1 #测试\n"));
 
 }
 
@@ -302,14 +307,6 @@ TEST(IniFile, deleteKey)
     fread(buf, sizeof(char), 200, fp);
     fclose(fp);
     EXPECT_EQ(buf, string("USER=root\n[COMMON]\nPASSWD=tt\n#commit\n;---------\n[DEFINE]\nname=cxy\n"));
-
 }
 
-//#ifdef GTEST_MAIN
-int main(int argc, char *argv[])
-{
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }
-
-//#endif
