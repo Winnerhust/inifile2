@@ -4,8 +4,8 @@
 #include "inifile.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <iostream>
 #include <ctype.h>
+#include <iostream>
 #include <fstream>
 
 using namespace std;
@@ -270,7 +270,7 @@ int IniFile::save()
 int IniFile::saveas(const string &filename)
 {
     string data = "";
-
+    cout<<"############ saveas start ############"<<endl;
 	/* 载入section数据 */
     for (IniSection_it sect = sections_vt.begin(); sect != sections_vt.end(); ++sect) {
         if ((*sect)->comment != "") {
@@ -307,7 +307,7 @@ int IniFile::saveas(const string &filename)
     ofstream ofs(filename);
     ofs << data;
     ofs.close();
-
+    cout<<"############ saveas end ############"<<endl;
     return 0;
 }
 IniSection *IniFile::getSection(const string &section /*=""*/)
@@ -584,6 +584,7 @@ bool IniFile::isComment(const string &str)
 /*--------------------------------------------------------------------------*/
 void IniFile::print()
 {
+    cout<<"############ print start ############"<<endl;
     printf("filename:[%s]\n", fname_.c_str());
 
     printf("flags_:[");
@@ -607,6 +608,7 @@ void IniFile::print()
                 printf("    rcomment:[\n%s]\n", i->right_comment.c_str());
         }
     }
+    cout<<"############ print end ############"<<endl;
 
 }
 
