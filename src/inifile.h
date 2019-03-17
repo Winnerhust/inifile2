@@ -3,6 +3,7 @@
 
 #include <map>
 #include <vector>
+#include <algorithm>
 #include <string>
 #include <string.h>
 
@@ -14,21 +15,26 @@ const int RET_ERR = -1;
 const string delim = "\n";
 struct IniItem {
     string key;
+	string blank1;
+	string blank2;
     string value;
-    string comment;
+	string blank3;
+    string comment;//每个键的注释，都是指该行上方的内容
+    string right_comment;
 };
 struct IniSection {
-    typedef vector<IniItem>::iterator iterator;
-    iterator begin() {
-        return items.begin();
+    typedef vector<IniItem>::iterator IniItem_it;//定义一个迭代器，即指向键元素的指针
+    IniItem_it begin() {
+        return items.begin();//段结构体的begin元素指向items的头指针
     }
-    iterator end() {
-        return items.end();
+    IniItem_it end() {
+        return items.end();//段结构体的begin元素指向items的尾指针
     }
 
     string name;
-    string comment;
-    vector<IniItem> items;
+    string comment;//每个段的注释，都是指该行上方的内容
+    string right_comment;
+    vector<IniItem> items;//键值项数组，一个段可以有多个键值，所有用vector来储存
 };
 
 class IniFile
@@ -40,14 +46,9 @@ public:
     }
 
 public:
-    typedef map<string, IniSection *>::iterator iterator;
+    typedef map<string, IniSection *>::iterator map_it;
+    typedef vector<IniSection *>::iterator IniSection_it;
 
-    iterator begin() {
-        return sections_.begin();
-    }
-    iterator end() {
-        return sections_.end();
-    }
 public:
     /* 打开并解析一个名为fname的INI文件 */
     int load(const string &fname);
@@ -92,9 +93,9 @@ public:
     /*删除特定段的特定参数*/
     void deleteKey(const string &section, const string &key);
 public:
-    /*去掉str后面的c字符*/
-    static void trimleft(string &str, char c = ' ');
     /*去掉str前面的c字符*/
+    static void trimleft(string &str, char c = ' ');
+    /*去掉str后面的c字符*/
     static void trimright(string &str, char c = ' ');
     /*去掉str前面和后面的空格符,Tab符等空白符*/
     static void trim(string &str);
@@ -103,13 +104,15 @@ private:
     IniSection *getSection(const string &section = "");
     void release();
     int getline(string &str, FILE *fp);
+	size_t split(string &str, string &left_str, string &right_str, string &seperator);
     bool isComment(const string &str);
-    bool parse(const string &content, string &key, string &value, char c = '=');
-    //for dubug
+    bool parse(const string &content, string &key, string &blank1, string &blank2, string &value, string &blank3, char c = '=');
+    //for debug
     void print();
 
 private:
-    map<string, IniSection *> sections_;
+    map<string, IniSection *> sections_map;//用于存储段集合的map容器
+    vector<IniSection *> sections_vt;//用于存储段集合的vector容器
     string fname_;
     vector<string> flags_;
 };
