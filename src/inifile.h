@@ -105,6 +105,10 @@ class IniFile
     /* 获取section段所有键为key的值,并将值赋到values的vector中 */
     int GetValues(const string &section, const string &key, vector<string> *values);
 
+    /* 获取section列表,并返回section个数 */
+    int GetSections(vector<string> *sections);
+    /* 获取section个数，至少存在一个空section */
+    int GetSectionNum();
     /* 是否存在某个section */
     bool HasSection(const string &section);
 

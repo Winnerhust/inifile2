@@ -287,6 +287,20 @@ IniSection *IniFile::getSection(const string &section /*=""*/)
     return NULL;
 }
 
+int IniFile::GetSections(vector<string> *sections)
+{
+    for (IniSection_it it = sections_vt.begin(); it != sections_vt.end(); ++it) {
+        sections->push_back((*it)->name);
+    }
+
+    return sections->size();
+}
+
+int IniFile::GetSectionNum()
+{
+    return sections_vt.size();
+}
+
 int IniFile::GetStringValue(const string &section, const string &key, string *value)
 {
     return getValue(section, key, value);
