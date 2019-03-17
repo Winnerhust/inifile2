@@ -89,6 +89,17 @@ class IniFile
     int getIntValue(const string &section, const string &key, int *value);
     /* 获取section段第一个键为key的double值，成功返回0，否则返回错误码 */
     int getDoubleValue(const string &section, const string &key, double *value);
+    /* 获取section段第一个键为key的bool值，成功返回0，否则返回错误码 */
+    int getBoolValue(const string &section, const string &key, bool *value);
+
+    /* 获取section段第一个键为key的string值，成功返回获取的值，否则返回默认值 */
+    void getStringValueOrDefault(const string &section, const string &key, string *value, const string &defaultValue);
+    /* 获取section段第一个键为key的int值，成功返回获取的值，否则返回默认值 */
+    void getIntValueOrDefault(const string &section, const string &key, int *value, int defaultValue);
+    /* 获取section段第一个键为key的double值，成功返回获取的值，否则返回默认值 */
+    void getDoubleValueOrDefault(const string &section, const string &key, double *value, double defaultValue);
+    /* 获取section段第一个键为key的bool值，成功返回获取的值，否则返回默认值 */
+    void getBoolValueOrDefault(const string &section, const string &key, bool *value, bool defaultValue);
 
     /* 获取section段所有键为key的值,并将值赋到values的vector中 */
     int getValues(const string &section, const string &key, vector<string> &values);
@@ -136,6 +147,8 @@ class IniFile
     int getValue(const string &section, const string &key, string &value);
     /* 获取section段第一个键为key的值,并将值赋到value中,将注释赋到comment中 */
     int getValue(const string &section, const string &key, string &value, string &comment);
+
+    int StringCmpIgnoreCase(const string &str1, const string &str2);
 
  private:
     typedef map<string, IniSection *>::iterator map_it;

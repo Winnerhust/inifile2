@@ -367,6 +367,63 @@ int IniFile::getDoubleValue(const string &section, const string &key, double *va
     return err;
 }
 
+int IniFile::getBoolValue(const string &section, const string &key, bool *value)
+{
+    int err;
+    string strValue;
+
+    err = getValue(section, key, strValue);
+
+    if ((StringCmpIgnoreCase(strValue, "true") == 0) || (StringCmpIgnoreCase(strValue, "1") == 0)) {
+        *value = true;
+    } else if ((StringCmpIgnoreCase(strValue, "false") == 0) || (StringCmpIgnoreCase(strValue, "0") == 0)) {
+        *value = false;
+    }
+
+    return err;
+}
+
+/* 获取section段第一个键为key的string值，成功返回获取的值，否则返回默认值 */
+void IniFile::getStringValueOrDefault(const string &section, const string &key,
+                                      string *value, const string &defaultValue)
+{
+    if (getStringValue(section, key, value) != 0) {
+        *value = defaultValue;
+    }
+
+    return;
+}
+
+/* 获取section段第一个键为key的int值，成功返回获取的值，否则返回默认值 */
+void IniFile::getIntValueOrDefault(const string &section, const string &key, int *value, int defaultValue)
+{
+    if (getIntValue(section, key, value) != 0) {
+        *value = defaultValue;
+    }
+
+    return;
+}
+
+/* 获取section段第一个键为key的double值，成功返回获取的值，否则返回默认值 */
+void IniFile::getDoubleValueOrDefault(const string &section, const string &key, double *value, double defaultValue)
+{
+    if (getDoubleValue(section, key, value) != 0) {
+        *value = defaultValue;
+    }
+
+    return;
+}
+
+/* 获取section段第一个键为key的bool值，成功返回获取的值，否则返回默认值 */
+void IniFile::getBoolValueOrDefault(const string &section, const string &key, bool *value, bool defaultValue)
+{
+    if (getBoolValue(section, key, value) != 0) {
+        *value = defaultValue;
+    }
+
+    return;
+}
+
 int IniFile::getValue(const string &section, const string &key, string &value)
 {
     string comment;
@@ -715,6 +772,16 @@ size_t IniFile::split(string &str, string &left_str, string &right_str, string &
     }
 
     return pos;
+}
+
+int IniFile::StringCmpIgnoreCase(const string &str1, const string &str2)
+{
+    string a = str1;
+    string b = str2;
+    transform(a.begin(), a.end(), a.begin(), towupper);
+    transform(b.begin(), b.end(), b.begin(), towupper);
+
+    return (a == b);
 }
 
 }  /* namespace inifile */

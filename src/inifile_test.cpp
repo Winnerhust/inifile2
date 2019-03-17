@@ -140,7 +140,7 @@ TEST(IniFile, hasSection_and_getValue)
     //create a new ini file
     char filepath[] = "test/test.ini";
     FILE *fp = fopen(filepath, "w+");
-    char content[] = " USER=root \r\n [COMMON] \n DB=sys   	\nPASSWD=tt   \n#commit   \n ;--------- \n[DEFINE] \nname=cxy\nvalue=1 #测试\n";
+    char content[] = " USER=root \r\n [COMMON] \n DB=sys   	\nPASSWD=tt   \n#commit   \n ;--------- \n[DEFINE] \nname=cxy\nvalue=1\nbooltest=True #测试\n";
     fwrite(content, 1, strlen(content), fp);
     fclose(fp);
 
@@ -158,6 +158,7 @@ TEST(IniFile, hasSection_and_getValue)
 
     string value;
     int intValue;
+    bool boolValue;
     EXPECT_EQ(ini.getStringValue("", "USER", &value), 0);
     EXPECT_EQ(value, string("root"));
     EXPECT_EQ(ini.getStringValue("COMMON", "DB", &value), 0);
@@ -168,7 +169,8 @@ TEST(IniFile, hasSection_and_getValue)
     EXPECT_EQ(value, string("cxy"));
     EXPECT_EQ(ini.getIntValue("DEFINE", "value", &intValue), 0);
     EXPECT_EQ(intValue, 1);
-
+    EXPECT_EQ(ini.getBoolValue("DEFINE", "booltest", &boolValue), 0);
+    EXPECT_EQ(boolValue, true);
 }
 
 TEST(IniFile, reopen)
