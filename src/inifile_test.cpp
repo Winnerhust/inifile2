@@ -7,55 +7,54 @@
 
 #include "inifile.h"
 
-using namespace std;
 using namespace inifile;
 namespace {
 TEST(inifile, trim)
 {
-    string buf = "   aaa    ";
+    std::string buf = "   aaa    ";
     IniFile::trim(buf);
 
-    EXPECT_EQ(buf, string("aaa"));
+    EXPECT_EQ(buf, std::string("aaa"));
 
     buf =  "   aaa";
     IniFile::trim(buf);
-    EXPECT_EQ(buf, string("aaa"));
+    EXPECT_EQ(buf, std::string("aaa"));
 
     buf =  "aaa    ";
     IniFile::trim(buf);
-    EXPECT_EQ(buf, string("aaa"));
+    EXPECT_EQ(buf, std::string("aaa"));
 }
 
 TEST(inifile, trimleft)
 {
-    string p = "   aaa    ";
+    std::string p = "   aaa    ";
     IniFile::trimleft(p);
 
-    EXPECT_EQ(p, string("aaa    "));
+    EXPECT_EQ(p, std::string("aaa    "));
 
     p =  "   aaa";
     IniFile::trimleft(p);
-    EXPECT_EQ(p, string("aaa"));
+    EXPECT_EQ(p, std::string("aaa"));
 
     p = "aaa    ";
     IniFile::trimleft(p);
-    EXPECT_EQ(p, string("aaa    "));
+    EXPECT_EQ(p, std::string("aaa    "));
 }
 
 TEST(inifile, trimright)
 {
-    string p = "   aaa    ";
+    std::string p = "   aaa    ";
     IniFile::trimright(p);
 
-    EXPECT_EQ(p, string("   aaa"));
+    EXPECT_EQ(p, std::string("   aaa"));
 
     p =  "   aaa";
     IniFile::trimright(p);
-    EXPECT_EQ(p, string("   aaa"));
+    EXPECT_EQ(p, std::string("   aaa"));
 
     p = "aaa    ";
     IniFile::trimright(p);
-    EXPECT_EQ(p, string("aaa"));
+    EXPECT_EQ(p, std::string("aaa"));
 }
 
 ////////////////////////////
@@ -63,8 +62,8 @@ TEST(inifile, trimright)
 TEST(IniFile, pasre)
 {
     IniFile section;
-    string s = "DB=sys";
-    string key, b1, b2, value, b3;
+    std::string s = "DB=sys";
+    std::string key, b1, b2, value, b3;
 
     EXPECT_EQ(section.parse(s, key, b1, b2, value, b3), true);
     EXPECT_EQ(key, "DB");
@@ -106,7 +105,7 @@ TEST(IniFile, getline)
 
     //test
     IniFile ini;
-    string line;
+    std::string line;
     fp = fopen(filepath, "r");
 
     ini.getline(line, fp);
@@ -151,22 +150,22 @@ TEST(IniFile, hasSection_and_getValue)
     ini.print();
     cout<<"---------------\n"<<endl;
     */
-    EXPECT_EQ(ini.hasSection(string("")), true);
+    EXPECT_EQ(ini.hasSection(std::string("")), true);
     EXPECT_EQ(ini.hasSection("COMMON"), true);
     EXPECT_EQ(ini.hasSection("DEFINE"), true);
     EXPECT_EQ(ini.hasSection("ss"), false);
 
-    string value;
+    std::string value;
     int intValue;
     bool boolValue;
     EXPECT_EQ(ini.getStringValue("", "USER", &value), 0);
-    EXPECT_EQ(value, string("root"));
+    EXPECT_EQ(value, std::string("root"));
     EXPECT_EQ(ini.getStringValue("COMMON", "DB", &value), 0);
-    EXPECT_EQ(value, string("sys"));
+    EXPECT_EQ(value, std::string("sys"));
     EXPECT_EQ(ini.getStringValue("COMMON", "PASSWD", &value), 0);
-    EXPECT_EQ(value, string("tt"));
+    EXPECT_EQ(value, std::string("tt"));
     EXPECT_EQ(ini.getStringValue("DEFINE", "name", &value), 0);
-    EXPECT_EQ(value, string("cxy"));
+    EXPECT_EQ(value, std::string("cxy"));
     EXPECT_EQ(ini.getIntValue("DEFINE", "value", &intValue), 0);
     EXPECT_EQ(intValue, 1);
     EXPECT_EQ(ini.getBoolValue("DEFINE", "booltest", &boolValue), 0);
@@ -200,11 +199,11 @@ TEST(IniFile, reopen)
     EXPECT_EQ(ini.hasSection("COMMON"), true);
     EXPECT_EQ(ini.hasSection("DEFINE"), false);
 
-    string value;
+    std::string value;
     EXPECT_EQ(ini.getStringValue("", "USER", &value), 0);
-    EXPECT_EQ(value, string("root2"));
+    EXPECT_EQ(value, std::string("root2"));
     EXPECT_EQ(ini.getStringValue("COMMON", "DB", &value), 0);
-    EXPECT_EQ(value, string("sys2"));
+    EXPECT_EQ(value, std::string("sys2"));
     EXPECT_EQ(ini.getStringValue("COMMON", "PASSWD", &value), -1);
     EXPECT_EQ(ini.getStringValue("DEFINE", "name", &value), -1);
 
@@ -233,7 +232,7 @@ TEST(IniFile, saveas)
 
     fread(buf, sizeof(char), 200, fp);
     fclose(fp);
-    EXPECT_EQ(buf, string("USER=root\n[COMMON]\nDB=sys\nPASSWD=tt\n#commit\n;---------\n[DEFINE]\nname=cxy\nvalue=1 #测试\n"));
+    EXPECT_EQ(buf, std::string("USER=root\n[COMMON]\nDB=sys\nPASSWD=tt\n#commit\n;---------\n[DEFINE]\nname=cxy\nvalue=1 #测试\n"));
 
 }
 
@@ -254,7 +253,7 @@ TEST(IniFile, setValue)
 
     fread(buf, sizeof(char), 200, fp);
     fclose(fp);
-    EXPECT_EQ(buf, string("NAME=cxy\n[COMMON]\n#数据库\nDB=sys\n#数据库密码\nPASSWD=root\n"));
+    EXPECT_EQ(buf, std::string("NAME=cxy\n[COMMON]\n#数据库\nDB=sys\n#数据库密码\nPASSWD=root\n"));
 }
 TEST(IniFile, deleteSection)
 {
@@ -281,7 +280,7 @@ TEST(IniFile, deleteSection)
 
     fread(buf, sizeof(char), 200, fp);
     fclose(fp);
-    EXPECT_EQ(buf, string("USER=root\n#commit\n;---------\n[DEFINE]\nname=cxy\n"));
+    EXPECT_EQ(buf, std::string("USER=root\n#commit\n;---------\n[DEFINE]\nname=cxy\n"));
 
 }
 TEST(IniFile, deleteKey)
@@ -309,7 +308,7 @@ TEST(IniFile, deleteKey)
 
     fread(buf, sizeof(char), 200, fp);
     fclose(fp);
-    EXPECT_EQ(buf, string("USER=root\n[COMMON]\nPASSWD=tt\n#commit\n;---------\n[DEFINE]\nname=cxy\n"));
+    EXPECT_EQ(buf, std::string("USER=root\n[COMMON]\nPASSWD=tt\n#commit\n;---------\n[DEFINE]\nname=cxy\n"));
 }
 
 }
