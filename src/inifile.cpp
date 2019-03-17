@@ -340,7 +340,7 @@ IniSection *IniFile::getSection(const string &section /*=""*/)
 
 int IniFile::getStringValue(const string &section, const string &key, string *value)
 {
-    return getValue(section, key, *value);
+    return getValue(section, key, value);
 }
 
 int IniFile::getIntValue(const string &section, const string &key, int *intValue)
@@ -348,7 +348,7 @@ int IniFile::getIntValue(const string &section, const string &key, int *intValue
     int err;
     string strValue;
 
-    err = getValue(section, key, strValue);
+    err = getValue(section, key, &strValue);
 
     *intValue = atoi(strValue.c_str());
 
@@ -360,7 +360,7 @@ int IniFile::getDoubleValue(const string &section, const string &key, double *va
     int err;
     string strValue;
 
-    err = getValue(section, key, strValue);
+    err = getValue(section, key, &strValue);
 
     *value = atof(strValue.c_str());
 
@@ -372,7 +372,7 @@ int IniFile::getBoolValue(const string &section, const string &key, bool *value)
     int err;
     string strValue;
 
-    err = getValue(section, key, strValue);
+    err = getValue(section, key, &strValue);
 
     if ((StringCmpIgnoreCase(strValue, "true") == 0) || (StringCmpIgnoreCase(strValue, "1") == 0)) {
         *value = true;
@@ -424,21 +424,21 @@ void IniFile::getBoolValueOrDefault(const string &section, const string &key, bo
     return;
 }
 
-int IniFile::getValue(const string &section, const string &key, string &value)
+int IniFile::getValue(const string &section, const string &key, string *value)
 {
     string comment;
-    return getValue(section, key, value, comment);
+    return getValue(section, key, value, &comment);
 }
 
-int IniFile::getValue(const string &section, const string &key, string &value, string &comment)
+int IniFile::getValue(const string &section, const string &key, string *value, string *comment)
 {
     IniSection *sect = getSection(section);
 
     if (sect != NULL) {
         for (IniSection::IniItem_it it = sect->begin(); it != sect->end(); ++it) {
             if (it->key == key) {
-                value = it->value;
-                comment = it->comment;
+                *value = it->value;
+                *comment = it->comment;
                 return RET_OK;
             }
         }
@@ -447,18 +447,18 @@ int IniFile::getValue(const string &section, const string &key, string &value, s
     return RET_ERR;
 }
 
-int IniFile::getValues(const string &section, const string &key, vector<string> &values)
+int IniFile::getValues(const string &section, const string &key, vector<string> *values)
 {
     vector<string> comments;
-    return getValues(section, key, values, comments);
+    return getValues(section, key, values, &comments);
 }
 
-int IniFile::getValues(const string &section, const string &key, vector<string> &values, vector<string> &comments)
+int IniFile::getValues(const string &section, const string &key, vector<string> *values, vector<string> *comments)
 {
     string value, comment;
 
-    values.clear();
-    comments.clear();
+    values->clear();
+    comments->clear();
 
     IniSection *sect = getSection(section);
 
@@ -468,13 +468,13 @@ int IniFile::getValues(const string &section, const string &key, vector<string> 
                 value = it->value;
                 comment = it->comment;
 
-                values.push_back(value);
-                comments.push_back(comment);
+                values->push_back(value);
+                comments->push_back(comment);
             }
         }
     }
 
-    return (values.size() ? RET_OK : RET_ERR);
+    return (values->size() ? RET_OK : RET_ERR);
 }
 
 bool IniFile::hasSection(const string &section)
@@ -495,31 +495,6 @@ bool IniFile::hasKey(const string &section, const string &key)
     }
 
     return false;
-}
-
-int IniFile::getSectionComment(const string &section, string &comment)
-{
-    comment = "";
-    IniSection *sect = getSection(section);
-
-    if (sect != NULL) {
-        comment = sect->comment;
-        return RET_OK;
-    }
-
-    return RET_ERR;
-}
-
-int IniFile::setSectionComment(const string &section, const string &comment)
-{
-    IniSection *sect = getSection(section);
-
-    if (sect != NULL) {
-        sect->comment = comment;
-        return RET_OK;
-    }
-
-    return RET_ERR;
 }
 
 int IniFile::setValue(const string &section, const string &key, const string &value, const string &comment /*=""*/)
@@ -564,9 +539,32 @@ int IniFile::setValue(const string &section, const string &key, const string &va
     return RET_OK;
 }
 
-void IniFile::getCommentFlags(vector<string> &flags)
+int IniFile::SetStringValue(const string &section, const string &key, const string &value)
 {
-    flags = flags_;
+    return setValue(section, key, value);
+}
+
+int IniFile::SetIntValue(const string &section, const string &key, int value)
+{
+    char buf[64] = {0};
+    snprintf(buf, sizeof(buf), "%d", value);
+    return setValue(section, key, buf);
+}
+
+int IniFile::SetDoubleValue(const string &section, const string &key, double value)
+{
+    char buf[64] = {0};
+    snprintf(buf, sizeof(buf), "%f", value);
+    return setValue(section, key, buf);
+}
+
+int IniFile::SetBoolValue(const string &section, const string &key, bool value)
+{
+    if (value) {
+        return setValue(section, key, "true");
+    } else {
+        return setValue(section, key, "false");
+    }
 }
 
 void IniFile::setCommentFlags(const vector<string> &flags)

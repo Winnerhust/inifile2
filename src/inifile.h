@@ -102,29 +102,32 @@ class IniFile
     void getBoolValueOrDefault(const string &section, const string &key, bool *value, bool defaultValue);
 
     /* 获取section段所有键为key的值,并将值赋到values的vector中 */
-    int getValues(const string &section, const string &key, vector<string> &values);
-    /* 获取section段所有键为key的值,并将值赋到values的vector中,,将注释赋到comments的vector中 */
-    int getValues(const string &section, const string &key, vector<string> &value, vector<string> &comments);
+    int getValues(const string &section, const string &key, vector<string> *values);
 
-    bool hasSection(const string &section) ;
-    bool hasKey(const string &section, const string &key) ;
+    /* 是否存在某个section */
+    bool hasSection(const string &section);
 
-    /* 获取section段的注释 */
-    int getSectionComment(const string &section, string &comment);
-    /* 设置section段的注释 */
-    int setSectionComment(const string &section, const string &comment);
-    /*获取注释标记符列表*/
-    void getCommentFlags(vector<string> &flags);
-    /*设置注释标记符列表*/
-    void setCommentFlags(const vector<string> &flags);
+    /* 是否存在某个key */
+    bool hasKey(const string &section, const string &key);
 
-    /*同时设置值和注释*/
-    int setValue(const string &section, const string &key, const string &value, const string &comment = "");
+    int SetStringValue(const string &section, const string &key, const string &value);
+    int SetIntValue(const string &section, const string &key, int value);
+    int SetDoubleValue(const string &section, const string &key, double value);
+    int SetBoolValue(const string &section, const string &key, bool value);
+
     /*删除段*/
     void deleteSection(const string &section);
     /*删除特定段的特定参数*/
     void deleteKey(const string &section, const string &key);
- public:
+    /*设置注释标记符列表*/
+    void setCommentFlags(const vector<string> &flags);
+ private:
+    /* 获取section段所有键为key的值,并将值赋到values的vector中,,将注释赋到comments的vector中 */
+    int getValues(const string &section, const string &key, vector<string> *value, vector<string> *comments);
+
+    /*同时设置值和注释*/
+    int setValue(const string &section, const string &key, const string &value, const string &comment = "");
+
     /* 去掉str前面的c字符 */
     static void trimleft(string &str, char c = ' ');
     /* 去掉str后面的c字符 */
@@ -144,9 +147,9 @@ class IniFile
 
  private:
     /* 获取section段第一个键为key的值,并将值赋到value中 */
-    int getValue(const string &section, const string &key, string &value);
+    int getValue(const string &section, const string &key, string *value);
     /* 获取section段第一个键为key的值,并将值赋到value中,将注释赋到comment中 */
-    int getValue(const string &section, const string &key, string &value, string &comment);
+    int getValue(const string &section, const string &key, string *value, string *comment);
 
     int StringCmpIgnoreCase(const string &str1, const string &str2);
 
