@@ -338,31 +338,33 @@ IniSection *IniFile::getSection(const string &section /*=""*/)
     return NULL;
 }
 
-string IniFile::getStringValue(const string &section, const string &key, int &ret)
+int IniFile::getStringValue(const string &section, const string &key, string *value)
 {
-    string value, comment;
-
-    ret = getValue(section, key, value, comment);
-
-    return value;
+    return getValue(section, key, *value);
 }
 
-int IniFile::getIntValue(const string &section, const string &key, int &ret)
+int IniFile::getIntValue(const string &section, const string &key, int *intValue)
 {
-    string value, comment;
+    int err;
+    string strValue;
 
-    ret = getValue(section, key, value, comment);
+    err = getValue(section, key, strValue);
 
-    return atoi(value.c_str());
+    *intValue = atoi(strValue.c_str());
+
+    return err;
 }
 
-double IniFile::getDoubleValue(const string &section, const string &key, int &ret)
+int IniFile::getDoubleValue(const string &section, const string &key, double *value)
 {
-    string value, comment;
+    int err;
+    string strValue;
 
-    ret = getValue(section, key, value, comment);
+    err = getValue(section, key, strValue);
 
-    return atof(value.c_str());
+    *value = atof(strValue.c_str());
+
+    return err;
 }
 
 int IniFile::getValue(const string &section, const string &key, string &value)

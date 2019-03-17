@@ -157,16 +157,17 @@ TEST(IniFile, hasSection_and_getValue)
     EXPECT_EQ(ini.hasSection("ss"), false);
 
     string value;
-    EXPECT_EQ(ini.getValue("", "USER", value), 0);
+    int intValue;
+    EXPECT_EQ(ini.getStringValue("", "USER", &value), 0);
     EXPECT_EQ(value, string("root"));
-    EXPECT_EQ(ini.getValue("COMMON", "DB", value), 0);
+    EXPECT_EQ(ini.getStringValue("COMMON", "DB", &value), 0);
     EXPECT_EQ(value, string("sys"));
-    EXPECT_EQ(ini.getValue("COMMON", "PASSWD", value), 0);
+    EXPECT_EQ(ini.getStringValue("COMMON", "PASSWD", &value), 0);
     EXPECT_EQ(value, string("tt"));
-    EXPECT_EQ(ini.getValue("DEFINE", "name", value), 0);
+    EXPECT_EQ(ini.getStringValue("DEFINE", "name", &value), 0);
     EXPECT_EQ(value, string("cxy"));
-    EXPECT_EQ(ini.getValue("DEFINE", "value", value), 0);
-    EXPECT_EQ(value, string("1"));
+    EXPECT_EQ(ini.getIntValue("DEFINE", "value", &intValue), 0);
+    EXPECT_EQ(intValue, 1);
 
 }
 
@@ -198,12 +199,12 @@ TEST(IniFile, reopen)
     EXPECT_EQ(ini.hasSection("DEFINE"), false);
 
     string value;
-    EXPECT_EQ(ini.getValue("", "USER", value), 0);
+    EXPECT_EQ(ini.getStringValue("", "USER", &value), 0);
     EXPECT_EQ(value, string("root2"));
-    EXPECT_EQ(ini.getValue("COMMON", "DB", value), 0);
+    EXPECT_EQ(ini.getStringValue("COMMON", "DB", &value), 0);
     EXPECT_EQ(value, string("sys2"));
-    EXPECT_EQ(ini.getValue("COMMON", "PASSWD", value), -1);
-    EXPECT_EQ(ini.getValue("DEFINE", "name", value), -1);
+    EXPECT_EQ(ini.getStringValue("COMMON", "PASSWD", &value), -1);
+    EXPECT_EQ(ini.getStringValue("DEFINE", "name", &value), -1);
 
 }
 

@@ -76,10 +76,6 @@ class IniFile
     }
 
  public:
-    typedef map<string, IniSection *>::iterator map_it;
-    typedef vector<IniSection *>::iterator IniSection_it;
-
- public:
     /* 打开并解析一个名为fname的INI文件 */
     int load(const string &fname);
     /* 将内容保存到当前文件 */
@@ -87,17 +83,12 @@ class IniFile
     /* 将内容另存到一个名为fname的文件 */
     int saveas(const string &fname);
 
-    /* 获取section段第一个键为key的值,并返回其string型的值 */
-    string getStringValue(const string &section, const string &key, int &ret);
-    /* 获取section段第一个键为key的值,并返回其int型的值 */
-    int getIntValue(const string &section, const string &key, int &ret);
-    /* 获取section段第一个键为key的值,并返回其double型的值 */
-    double getDoubleValue(const string &section, const string &key, int &ret);
-
-    /* 获取section段第一个键为key的值,并将值赋到value中 */
-    int getValue(const string &section, const string &key, string &value);
-    /* 获取section段第一个键为key的值,并将值赋到value中,将注释赋到comment中 */
-    int getValue(const string &section, const string &key, string &value, string &comment);
+    /* 获取section段第一个键为key的string值，成功返回0，否则返回错误码 */
+    int getStringValue(const string &section, const string &key, string *value);
+    /* 获取section段第一个键为key的int值，成功返回0，否则返回错误码 */
+    int getIntValue(const string &section, const string &key, int *value);
+    /* 获取section段第一个键为key的double值，成功返回0，否则返回错误码 */
+    int getDoubleValue(const string &section, const string &key, double *value);
 
     /* 获取section段所有键为key的值,并将值赋到values的vector中 */
     int getValues(const string &section, const string &key, vector<string> &values);
@@ -141,6 +132,15 @@ class IniFile
     void print();
 
  private:
+    /* 获取section段第一个键为key的值,并将值赋到value中 */
+    int getValue(const string &section, const string &key, string &value);
+    /* 获取section段第一个键为key的值,并将值赋到value中,将注释赋到comment中 */
+    int getValue(const string &section, const string &key, string &value, string &comment);
+
+ private:
+    typedef map<string, IniSection *>::iterator map_it;
+    typedef vector<IniSection *>::iterator IniSection_it;
+
     map<string, IniSection *> sections_map;  // 用于存储段集合的map容器
     vector<IniSection *> sections_vt;  // 用于存储段集合的vector容器
     string fname_;
