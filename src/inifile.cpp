@@ -33,6 +33,9 @@
 #include <fstream>
 #include "inifile.h"
 
+using std::cout;
+using std::endl;
+
 namespace inifile
 {
 
@@ -60,24 +63,24 @@ IniFile::IniFile()
  * @return  bool
  */
 /* ----------------------------------------------------------------------------*/
-bool IniFile::parse(const std::string &content, std::string &key,
-                    std::string &blank1, std::string &blank2, std::string &value, std::string &blank3, char c /*= '='*/)
+bool IniFile::parse(const string &content, string &key,
+                    string &blank1, string &blank2, string &value, string &blank3, char c /*= '='*/)
 {
     size_t pos_eq = content.find_first_of(c);  // 找到'='的位置
     size_t pb1, pb2, pb3;  // position of blank 1 /2 /3
 
-    if (pos_eq != std::string::npos) {
-        key = std::string(content, 0, pos_eq);  // pos_eq为key长度，包含key右边的空格
-        value = std::string(content, pos_eq + 1);  // 截取=号右边的字符, pos_eq为=号位置
+    if (pos_eq != string::npos) {
+        key = string(content, 0, pos_eq);  // pos_eq为key长度，包含key右边的空格
+        value = string(content, pos_eq + 1);  // 截取=号右边的字符, pos_eq为=号位置
 
         // 若文本形如：a = b #, 则key = a_, value = _b_，其中_代表空格
 
         pb1 = key.find_last_not_of(" ");
-        blank1 = std::string(key, pb1 + 1);  // pb1为key最后的非空字符，则pb1+1为key的空白起始位置
+        blank1 = string(key, pb1 + 1);  // pb1为key最后的非空字符，则pb1+1为key的空白起始位置
         pb2 = value.find_first_not_of(" ");  // pb2为value第一个非空字符位置，等于blank2长度
         pb3 = value.find_last_not_of(" ");
-        blank2 = std::string(value, 0, pb2);
-        blank3 = std::string(value, pb3 + 1);  // pb3为value倒数找到第一个非空字符，则pb3+1为blank3起始位置
+        blank2 = string(value, 0, pb2);
+        blank3 = string(value, pb3 + 1);  // pb3为value倒数找到第一个非空字符，则pb3+1为blank3起始位置
 
         return true;
     }
@@ -85,19 +88,19 @@ bool IniFile::parse(const std::string &content, std::string &key,
     return false;
 }
 
-int IniFile::load(const std::string &filename)
+int IniFile::Load(const string &filename)
 {
     release();
     fname_ = filename;
     IniSection *section = NULL;  // 初始化一个字段指针
 
-    std::string line;
-    std::string comment;
-    std::string right_comment;
+    string line;
+    string comment;
+    string right_comment;
 
     std::ifstream ifs(fname_);
     if (!ifs.is_open()) {
-        std::cout << "open file failed\n";
+        cout << "open file failed\n";
         return -1;
     }
 
@@ -119,17 +122,17 @@ int IniFile::load(const std::string &filename)
         // 如果该行以注释开头，添加到comment，跳过当前循环，continue
         if (isComment(line)) {
             comment += line + delim;
-            std::cout << "comment=\n" << comment;
+            cout << "comment=\n" << comment;
             continue;
         } else {  // 如果行首不是注释，查找行尾是否存在注释，若存在，切割该行，将注释内容添加到right_comment
-            std::string leftstr = "";
-            std::string rightstr = "";
+            string leftstr = "";
+            string rightstr = "";
             // 去掉注释，若行尾没有注释，不改变原数据
             for (size_t i = 0; i < flags_.size(); ++i) {
-                if (split(line, leftstr, rightstr, flags_[i]) != std::string::npos) {
+                if (split(line, leftstr, rightstr, flags_[i]) != string::npos) {
                     line = leftstr;  // 更新line，只含数据不含注释
-                    std::cout << "leftstr = " <<line << std::endl;
-                    std::cout << "rightstr = " <<rightstr << std::endl;
+                    cout << "leftstr = " <<line << endl;
+                    cout << "rightstr = " <<rightstr << endl;
                     break;
                 }
             }
@@ -147,7 +150,7 @@ int IniFile::load(const std::string &filename)
             // 查找右中括号
             size_t index = line.find_first_of(']');
 
-            if (index == std::string::npos) {
+            if (index == string::npos) {
                 ifs.close();
                 fprintf(stderr, "没有找到匹配的]\n");
                 return -1;
@@ -161,7 +164,7 @@ int IniFile::load(const std::string &filename)
             }
 
             // 取段名
-            std::string s(line, 1, len);
+            string s(line, 1, len);
 
             trim(s);
 
@@ -189,7 +192,7 @@ int IniFile::load(const std::string &filename)
         // 如果该行是键值，添加到section段的items容器
         } else {
             trimleft(line);
-            std::string key, blank1, blank2, value, blank3;
+            string key, blank1, blank2, value, blank3;
 
             if (parse(line, key, blank1, blank2, value, blank3)) {
                 IniItem item;
@@ -202,8 +205,8 @@ int IniFile::load(const std::string &filename)
                 item.blank1 = blank1;
                 item.blank2 = blank2;
                 item.blank3 = blank3;
-                std::cout << "item.comment=" << comment << std::endl;
-                std::cout << "item.right_comment=" << right_comment << std::endl;
+                cout << "item.comment=" << comment << endl;
+                cout << "item.right_comment=" << right_comment << endl;
 
                 section->items.push_back(item);
             } else {
@@ -221,15 +224,15 @@ int IniFile::load(const std::string &filename)
     return 0;
 }
 
-int IniFile::save()
+int IniFile::Save()
 {
-    return saveas(fname_);
+    return SaveAs(fname_);
 }
 
-int IniFile::saveas(const std::string &filename)
+int IniFile::SaveAs(const string &filename)
 {
-    std::string data = "";
-    std::cout << "############ saveas start ############" << std::endl;
+    string data = "";
+    cout << "############ SaveAs start ############" << endl;
     /* 载入section数据 */
     for (IniSection_it sect = sections_vt.begin(); sect != sections_vt.end(); ++sect) {
         if ((*sect)->comment != "") {
@@ -237,7 +240,7 @@ int IniFile::saveas(const std::string &filename)
         }
 
         if ((*sect)->name != "") {
-            data += std::string("[") + (*sect)->name + std::string("]");
+            data += string("[") + (*sect)->name + string("]");
             data += delim;
         }
 
@@ -269,11 +272,11 @@ int IniFile::saveas(const std::string &filename)
     std::ofstream ofs(filename);
     ofs << data;
     ofs.close();
-    std::cout << "############ saveas end ############" << std::endl;
+    cout << "############ SaveAs end ############" << endl;
     return 0;
 }
 
-IniSection *IniFile::getSection(const std::string &section /*=""*/)
+IniSection *IniFile::getSection(const string &section /*=""*/)
 {
     for (IniSection_it it = sections_vt.begin(); it != sections_vt.end(); ++it) {
         if ((*it)->name == section) {
@@ -284,15 +287,15 @@ IniSection *IniFile::getSection(const std::string &section /*=""*/)
     return NULL;
 }
 
-int IniFile::getStringValue(const std::string &section, const std::string &key, std::string *value)
+int IniFile::GetStringValue(const string &section, const string &key, string *value)
 {
     return getValue(section, key, value);
 }
 
-int IniFile::getIntValue(const std::string &section, const std::string &key, int *intValue)
+int IniFile::GetIntValue(const string &section, const string &key, int *intValue)
 {
     int err;
-    std::string strValue;
+    string strValue;
 
     err = getValue(section, key, &strValue);
 
@@ -301,10 +304,10 @@ int IniFile::getIntValue(const std::string &section, const std::string &key, int
     return err;
 }
 
-int IniFile::getDoubleValue(const std::string &section, const std::string &key, double *value)
+int IniFile::GetDoubleValue(const string &section, const string &key, double *value)
 {
     int err;
-    std::string strValue;
+    string strValue;
 
     err = getValue(section, key, &strValue);
 
@@ -313,10 +316,10 @@ int IniFile::getDoubleValue(const std::string &section, const std::string &key, 
     return err;
 }
 
-int IniFile::getBoolValue(const std::string &section, const std::string &key, bool *value)
+int IniFile::GetBoolValue(const string &section, const string &key, bool *value)
 {
     int err;
-    std::string strValue;
+    string strValue;
 
     err = getValue(section, key, &strValue);
 
@@ -330,10 +333,10 @@ int IniFile::getBoolValue(const std::string &section, const std::string &key, bo
 }
 
 /* 获取section段第一个键为key的string值，成功返回获取的值，否则返回默认值 */
-void IniFile::getStringValueOrDefault(const std::string &section, const std::string &key,
-                                      std::string *value, const std::string &defaultValue)
+void IniFile::GetStringValueOrDefault(const string &section, const string &key,
+                                      string *value, const string &defaultValue)
 {
-    if (getStringValue(section, key, value) != 0) {
+    if (GetStringValue(section, key, value) != 0) {
         *value = defaultValue;
     }
 
@@ -341,9 +344,9 @@ void IniFile::getStringValueOrDefault(const std::string &section, const std::str
 }
 
 /* 获取section段第一个键为key的int值，成功返回获取的值，否则返回默认值 */
-void IniFile::getIntValueOrDefault(const std::string &section, const std::string &key, int *value, int defaultValue)
+void IniFile::GetIntValueOrDefault(const string &section, const string &key, int *value, int defaultValue)
 {
-    if (getIntValue(section, key, value) != 0) {
+    if (GetIntValue(section, key, value) != 0) {
         *value = defaultValue;
     }
 
@@ -351,10 +354,9 @@ void IniFile::getIntValueOrDefault(const std::string &section, const std::string
 }
 
 /* 获取section段第一个键为key的double值，成功返回获取的值，否则返回默认值 */
-void IniFile::getDoubleValueOrDefault(const std::string &section, const std::string &key,
-                                      double *value, double defaultValue)
+void IniFile::GetDoubleValueOrDefault(const string &section, const string &key, double *value, double defaultValue)
 {
-    if (getDoubleValue(section, key, value) != 0) {
+    if (GetDoubleValue(section, key, value) != 0) {
         *value = defaultValue;
     }
 
@@ -362,22 +364,22 @@ void IniFile::getDoubleValueOrDefault(const std::string &section, const std::str
 }
 
 /* 获取section段第一个键为key的bool值，成功返回获取的值，否则返回默认值 */
-void IniFile::getBoolValueOrDefault(const std::string &section, const std::string &key, bool *value, bool defaultValue)
+void IniFile::GetBoolValueOrDefault(const string &section, const string &key, bool *value, bool defaultValue)
 {
-    if (getBoolValue(section, key, value) != 0) {
+    if (GetBoolValue(section, key, value) != 0) {
         *value = defaultValue;
     }
 
     return;
 }
 
-int IniFile::getValue(const std::string &section, const std::string &key, std::string *value)
+int IniFile::getValue(const string &section, const string &key, string *value)
 {
-    std::string comment;
+    string comment;
     return getValue(section, key, value, &comment);
 }
 
-int IniFile::getValue(const std::string &section, const std::string &key, std::string *value, std::string *comment)
+int IniFile::getValue(const string &section, const string &key, string *value, string *comment)
 {
     IniSection *sect = getSection(section);
 
@@ -394,16 +396,15 @@ int IniFile::getValue(const std::string &section, const std::string &key, std::s
     return RET_ERR;
 }
 
-int IniFile::getValues(const std::string &section, const std::string &key, std::vector<std::string> *values)
+int IniFile::GetValues(const string &section, const string &key, vector<string> *values)
 {
-    std::vector<std::string> comments;
-    return getValues(section, key, values, &comments);
+    vector<string> comments;
+    return GetValues(section, key, values, &comments);
 }
 
-int IniFile::getValues(const std::string &section, const std::string &key,
-                       std::vector<std::string> *values, std::vector<std::string> *comments)
+int IniFile::GetValues(const string &section, const string &key, vector<string> *values, vector<string> *comments)
 {
-    std::string value, comment;
+    string value, comment;
 
     values->clear();
     comments->clear();
@@ -425,12 +426,12 @@ int IniFile::getValues(const std::string &section, const std::string &key,
     return (values->size() ? RET_OK : RET_ERR);
 }
 
-bool IniFile::hasSection(const std::string &section)
+bool IniFile::HasSection(const string &section)
 {
     return (getSection(section) != NULL);
 }
 
-bool IniFile::hasKey(const std::string &section, const std::string &key)
+bool IniFile::HasKey(const string &section, const string &key)
 {
     IniSection *sect = getSection(section);
 
@@ -445,12 +446,11 @@ bool IniFile::hasKey(const std::string &section, const std::string &key)
     return false;
 }
 
-int IniFile::setValue(const std::string &section, const std::string &key,
-                      const std::string &value, const std::string &comment /*=""*/)
+int IniFile::setValue(const string &section, const string &key, const string &value, const string &comment /*=""*/)
 {
     IniSection *sect = getSection(section);
 
-    std::string comt = comment;
+    string comt = comment;
 
     if (comt != "") {
         comt = flags_[0] + comt;
@@ -488,26 +488,26 @@ int IniFile::setValue(const std::string &section, const std::string &key,
     return RET_OK;
 }
 
-int IniFile::SetStringValue(const std::string &section, const std::string &key, const std::string &value)
+int IniFile::SetStringValue(const string &section, const string &key, const string &value)
 {
     return setValue(section, key, value);
 }
 
-int IniFile::SetIntValue(const std::string &section, const std::string &key, int value)
+int IniFile::SetIntValue(const string &section, const string &key, int value)
 {
     char buf[64] = {0};
     snprintf(buf, sizeof(buf), "%d", value);
     return setValue(section, key, buf);
 }
 
-int IniFile::SetDoubleValue(const std::string &section, const std::string &key, double value)
+int IniFile::SetDoubleValue(const string &section, const string &key, double value)
 {
     char buf[64] = {0};
     snprintf(buf, sizeof(buf), "%f", value);
     return setValue(section, key, buf);
 }
 
-int IniFile::SetBoolValue(const std::string &section, const std::string &key, bool value)
+int IniFile::SetBoolValue(const string &section, const string &key, bool value)
 {
     if (value) {
         return setValue(section, key, "true");
@@ -516,12 +516,12 @@ int IniFile::SetBoolValue(const std::string &section, const std::string &key, bo
     }
 }
 
-void IniFile::setCommentFlags(const std::vector<std::string> &flags)
+void IniFile::SetCommentFlags(const vector<string> &flags)
 {
     flags_ = flags;
 }
 
-void IniFile::deleteSection(const std::string &section)
+void IniFile::DeleteSection(const string &section)
 {
     for (IniSection_it it = sections_vt.begin(); it != sections_vt.end(); ) {
         if ((*it)->name == section) {
@@ -534,7 +534,7 @@ void IniFile::deleteSection(const std::string &section)
     }
 }
 
-void IniFile::deleteKey(const std::string &section, const std::string &key)
+void IniFile::DeleteKey(const string &section, const string &key)
 {
     IniSection *sect = getSection(section);
 
@@ -573,7 +573,7 @@ void IniFile::release()
   @return   如果是注释则为真
  */
 /*--------------------------------------------------------------------------*/
-bool IniFile::isComment(const std::string &str)
+bool IniFile::isComment(const string &str)
 {
     bool ret = false;
 
@@ -608,7 +608,7 @@ bool IniFile::isComment(const std::string &str)
 /*--------------------------------------------------------------------------*/
 void IniFile::print()
 {
-    std::cout << "############ print start ############" << std::endl;
+    cout << "############ print start ############" << endl;
     printf("filename:[%s]\n", fname_.c_str());
 
     printf("flags_:[");
@@ -635,10 +635,10 @@ void IniFile::print()
         }
     }
 
-    std::cout << "############ print end ############" << std::endl;
+    cout << "############ print end ############" << endl;
 }
 
-void IniFile::trimleft(std::string &str, char c /*=' '*/)
+void IniFile::trimleft(string &str, char c /*=' '*/)
 {
     int len = str.length();
 
@@ -649,11 +649,11 @@ void IniFile::trimleft(std::string &str, char c /*=' '*/)
     }
 
     if (i != 0) {
-        str = std::string(str, i, len - i);
+        str = string(str, i, len - i);
     }
 }
 
-void IniFile::trimright(std::string &str, char c /*=' '*/)
+void IniFile::trimright(string &str, char c /*=' '*/)
 {
     int i = 0;
     int len = str.length();
@@ -664,7 +664,7 @@ void IniFile::trimright(std::string &str, char c /*=' '*/)
         }
     }
 
-    str = std::string(str, 0, i + 1);
+    str = string(str, 0, i + 1);
 }
 
 /*-------------------------------------------------------------------------*/
@@ -673,7 +673,7 @@ void IniFile::trimright(std::string &str, char c /*=' '*/)
   @param    str string变量
  */
 /*--------------------------------------------------------------------------*/
-void IniFile::trim(std::string &str)
+void IniFile::trim(string &str)
 {
     int len = str.length();
 
@@ -684,7 +684,7 @@ void IniFile::trim(std::string &str)
     }
 
     if (i != 0) {
-        str = std::string(str, i, len - i);
+        str = string(str, i, len - i);
     }
 
     len = str.length();
@@ -695,7 +695,7 @@ void IniFile::trim(std::string &str)
         }
     }
 
-    str = std::string(str, 0, i + 1);
+    str = string(str, 0, i + 1);
 }
 
 /*-------------------------------------------------------------------------*/
@@ -708,22 +708,22 @@ void IniFile::trim(std::string &str)
   @return   pos
  */
 /*--------------------------------------------------------------------------*/
-size_t IniFile::split(std::string &str, std::string &left_str, std::string &right_str, std::string &seperator)
+size_t IniFile::split(string &str, string &left_str, string &right_str, string &seperator)
 {
     size_t pos = str.find(seperator);
 
-    if (pos != std::string::npos) {
-        left_str = std::string(str, 0, pos);
-        right_str = std::string(str, pos);
+    if (pos != string::npos) {
+        left_str = string(str, 0, pos);
+        right_str = string(str, pos);
     }
 
     return pos;
 }
 
-int IniFile::StringCmpIgnoreCase(const std::string &str1, const std::string &str2)
+int IniFile::StringCmpIgnoreCase(const string &str1, const string &str2)
 {
-    std::string a = str1;
-    std::string b = str2;
+    string a = str1;
+    string b = str2;
     transform(a.begin(), a.end(), a.begin(), towupper);
     transform(b.begin(), b.end(), b.begin(), towupper);
 

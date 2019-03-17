@@ -7,54 +7,57 @@
 
 #include "inifile.h"
 
+using std::cout;
+using std::endl;
+
 using namespace inifile;
 namespace {
 TEST(inifile, trim)
 {
-    std::string buf = "   aaa    ";
+    string buf = "   aaa    ";
     IniFile::trim(buf);
 
-    EXPECT_EQ(buf, std::string("aaa"));
+    EXPECT_EQ(buf, string("aaa"));
 
     buf =  "   aaa";
     IniFile::trim(buf);
-    EXPECT_EQ(buf, std::string("aaa"));
+    EXPECT_EQ(buf, string("aaa"));
 
     buf =  "aaa    ";
     IniFile::trim(buf);
-    EXPECT_EQ(buf, std::string("aaa"));
+    EXPECT_EQ(buf, string("aaa"));
 }
 
 TEST(inifile, trimleft)
 {
-    std::string p = "   aaa    ";
+    string p = "   aaa    ";
     IniFile::trimleft(p);
 
-    EXPECT_EQ(p, std::string("aaa    "));
+    EXPECT_EQ(p, string("aaa    "));
 
     p =  "   aaa";
     IniFile::trimleft(p);
-    EXPECT_EQ(p, std::string("aaa"));
+    EXPECT_EQ(p, string("aaa"));
 
     p = "aaa    ";
     IniFile::trimleft(p);
-    EXPECT_EQ(p, std::string("aaa    "));
+    EXPECT_EQ(p, string("aaa    "));
 }
 
 TEST(inifile, trimright)
 {
-    std::string p = "   aaa    ";
+    string p = "   aaa    ";
     IniFile::trimright(p);
 
-    EXPECT_EQ(p, std::string("   aaa"));
+    EXPECT_EQ(p, string("   aaa"));
 
     p =  "   aaa";
     IniFile::trimright(p);
-    EXPECT_EQ(p, std::string("   aaa"));
+    EXPECT_EQ(p, string("   aaa"));
 
     p = "aaa    ";
     IniFile::trimright(p);
-    EXPECT_EQ(p, std::string("aaa"));
+    EXPECT_EQ(p, string("aaa"));
 }
 
 ////////////////////////////
@@ -62,8 +65,8 @@ TEST(inifile, trimright)
 TEST(IniFile, pasre)
 {
     IniFile section;
-    std::string s = "DB=sys";
-    std::string key, b1, b2, value, b3;
+    string s = "DB=sys";
+    string key, b1, b2, value, b3;
 
     EXPECT_EQ(section.parse(s, key, b1, b2, value, b3), true);
     EXPECT_EQ(key, "DB");
@@ -93,95 +96,90 @@ TEST(IniFile, pasre)
 
 TEST(IniFile, hasSection_and_getValue)
 {
-    //create a new ini file
+    // create a new ini file
     char filepath[] = "test/test.ini";
     FILE *fp = fopen(filepath, "w+");
     char content[] = " USER=root \r\n [COMMON] \n DB=sys   	\nPASSWD=tt   \n#commit   \n ;--------- \n[DEFINE] \nname=cxy\nvalue=1\nbooltest=True #测试\n";
     fwrite(content, 1, strlen(content), fp);
     fclose(fp);
 
-    //test
+    // test
     IniFile ini;
-    ini.load(filepath);
-    /*std::cout<<"---------------\n"<<std::endl;
-    ini.print();
-    std::cout<<"---------------\n"<<std::endl;
-    */
-    EXPECT_EQ(ini.hasSection(std::string("")), true);
-    EXPECT_EQ(ini.hasSection("COMMON"), true);
-    EXPECT_EQ(ini.hasSection("DEFINE"), true);
-    EXPECT_EQ(ini.hasSection("ss"), false);
+    ini.Load(filepath);
 
-    std::string value;
+    EXPECT_EQ(ini.HasSection(string("")), true);
+    EXPECT_EQ(ini.HasSection("COMMON"), true);
+    EXPECT_EQ(ini.HasSection("DEFINE"), true);
+    EXPECT_EQ(ini.HasSection("ss"), false);
+
+    string value;
     int intValue;
     bool boolValue;
-    EXPECT_EQ(ini.getStringValue("", "USER", &value), 0);
-    EXPECT_EQ(value, std::string("root"));
-    EXPECT_EQ(ini.getStringValue("COMMON", "DB", &value), 0);
-    EXPECT_EQ(value, std::string("sys"));
-    EXPECT_EQ(ini.getStringValue("COMMON", "PASSWD", &value), 0);
-    EXPECT_EQ(value, std::string("tt"));
-    EXPECT_EQ(ini.getStringValue("DEFINE", "name", &value), 0);
-    EXPECT_EQ(value, std::string("cxy"));
-    EXPECT_EQ(ini.getIntValue("DEFINE", "value", &intValue), 0);
+    EXPECT_EQ(ini.GetStringValue("", "USER", &value), 0);
+    EXPECT_EQ(value, string("root"));
+    EXPECT_EQ(ini.GetStringValue("COMMON", "DB", &value), 0);
+    EXPECT_EQ(value, string("sys"));
+    EXPECT_EQ(ini.GetStringValue("COMMON", "PASSWD", &value), 0);
+    EXPECT_EQ(value, string("tt"));
+    EXPECT_EQ(ini.GetStringValue("DEFINE", "name", &value), 0);
+    EXPECT_EQ(value, string("cxy"));
+    EXPECT_EQ(ini.GetIntValue("DEFINE", "value", &intValue), 0);
     EXPECT_EQ(intValue, 1);
-    EXPECT_EQ(ini.getBoolValue("DEFINE", "booltest", &boolValue), 0);
+    EXPECT_EQ(ini.GetBoolValue("DEFINE", "booltest", &boolValue), 0);
     EXPECT_EQ(boolValue, true);
 }
 
 TEST(IniFile, reopen)
 {
-    //create a new ini file
+    // create a new ini file
     char filepath[] = "test/test.ini";
     FILE *fp = fopen(filepath, "w");
     char content[] = " USER=root \r\n [COMMON] \n DB=sys   	\nPASSWD=tt   \n#commit   \n ;--------- \n[DEFINE] \nname=cxy\n";
     fwrite(content, sizeof(char), strlen(content), fp);
     fclose(fp);
 
-    //test
+    // test
     IniFile ini;
-    ini.load(filepath);
+    ini.Load(filepath);
 
-    //reopen
+    // reopen
 
     fp = fopen(filepath, "w");
     strcpy(content, " USER=root2 \r\n [COMMON] \n DB=sys2   	\n\n#commit   \n ;--------- \n\n\n");
     fwrite(content, sizeof(char), strlen(content), fp);
     fclose(fp);
 
-    //test
-    ini.load(filepath);
+    // test
+    ini.Load(filepath);
 
-    EXPECT_EQ(ini.hasSection(""), true);
-    EXPECT_EQ(ini.hasSection("COMMON"), true);
-    EXPECT_EQ(ini.hasSection("DEFINE"), false);
+    EXPECT_EQ(ini.HasSection(""), true);
+    EXPECT_EQ(ini.HasSection("COMMON"), true);
+    EXPECT_EQ(ini.HasSection("DEFINE"), false);
 
-    std::string value;
-    EXPECT_EQ(ini.getStringValue("", "USER", &value), 0);
-    EXPECT_EQ(value, std::string("root2"));
-    EXPECT_EQ(ini.getStringValue("COMMON", "DB", &value), 0);
-    EXPECT_EQ(value, std::string("sys2"));
-    EXPECT_EQ(ini.getStringValue("COMMON", "PASSWD", &value), -1);
-    EXPECT_EQ(ini.getStringValue("DEFINE", "name", &value), -1);
-
+    string value;
+    EXPECT_EQ(ini.GetStringValue("", "USER", &value), 0);
+    EXPECT_EQ(value, string("root2"));
+    EXPECT_EQ(ini.GetStringValue("COMMON", "DB", &value), 0);
+    EXPECT_EQ(value, string("sys2"));
+    EXPECT_EQ(ini.GetStringValue("COMMON", "PASSWD", &value), -1);
+    EXPECT_EQ(ini.GetStringValue("DEFINE", "name", &value), -1);
 }
 
-TEST(IniFile, saveas)
+TEST(IniFile, SaveAs)
 {
-    //create a new ini file
+    // create a new ini file
     char filepath[] = "test/test.ini";
     FILE *fp = fopen(filepath, "w");
     char content[] = " USER=root \r\n [COMMON] \n DB=sys   	\nPASSWD=tt   \n#commit   \n ;--------- \n[DEFINE] \nname=cxy\nvalue=1 #测试";
     fwrite(content, sizeof(char), strlen(content), fp);
     fclose(fp);
 
-    //test
     IniFile ini;
-    ini.load(filepath);
+    ini.Load(filepath);
 
     char saveas_path[] = "test/test_save_as.ini";
 
-    ini.saveas(saveas_path);
+    ini.SaveAs(saveas_path);
 
     fp = fopen(saveas_path, "r");
     char buf[200];
@@ -189,8 +187,7 @@ TEST(IniFile, saveas)
 
     fread(buf, sizeof(char), 200, fp);
     fclose(fp);
-    EXPECT_EQ(buf, std::string("USER=root\n[COMMON]\nDB=sys\nPASSWD=tt\n#commit\n;---------\n[DEFINE]\nname=cxy\nvalue=1 #测试\n"));
-
+    EXPECT_EQ(buf, string("USER=root\n[COMMON]\nDB=sys\nPASSWD=tt\n#commit\n;---------\n[DEFINE]\nname=cxy\nvalue=1 #测试\n"));
 }
 
 TEST(IniFile, setValue)
@@ -202,7 +199,7 @@ TEST(IniFile, setValue)
     ini.setValue("", "NAME", "cxy", "");
 
     char filepath[] = "test/test_set.ini";
-    ini.saveas(filepath);
+    ini.SaveAs(filepath);
 
     FILE *fp = fopen(filepath, "r");
     char buf[200];
@@ -210,26 +207,25 @@ TEST(IniFile, setValue)
 
     fread(buf, sizeof(char), 200, fp);
     fclose(fp);
-    EXPECT_EQ(buf, std::string("NAME=cxy\n[COMMON]\n#数据库\nDB=sys\n#数据库密码\nPASSWD=root\n"));
+    EXPECT_EQ(buf, string("NAME=cxy\n[COMMON]\n#数据库\nDB=sys\n#数据库密码\nPASSWD=root\n"));
 }
-TEST(IniFile, deleteSection)
+TEST(IniFile, DeleteSection)
 {
-    //create a new ini file
+    // create a new ini file
     char filepath[] = "test/test.ini";
     FILE *fp = fopen(filepath, "w");
     char content[] = " USER=root \r\n [COMMON] \n DB=sys   	\nPASSWD=tt   \n#commit   \n ;--------- \n[DEFINE] \nname=cxy\n";
     fwrite(content, sizeof(char), strlen(content), fp);
     fclose(fp);
 
-    //test
     IniFile ini;
-    ini.load(filepath);
+    ini.Load(filepath);
 
-    ini.deleteSection("COMMON");
+    ini.DeleteSection("COMMON");
 
     char saveas_path[] = "test/test_save_deleteS.ini";
 
-    ini.saveas(saveas_path);
+    ini.SaveAs(saveas_path);
 
     fp = fopen(saveas_path, "r");
     char buf[200];
@@ -237,27 +233,26 @@ TEST(IniFile, deleteSection)
 
     fread(buf, sizeof(char), 200, fp);
     fclose(fp);
-    EXPECT_EQ(buf, std::string("USER=root\n#commit\n;---------\n[DEFINE]\nname=cxy\n"));
-
+    EXPECT_EQ(buf, string("USER=root\n#commit\n;---------\n[DEFINE]\nname=cxy\n"));
 }
-TEST(IniFile, deleteKey)
+
+TEST(IniFile, DeleteKey)
 {
-    //create a new ini file
+    // create a new ini file
     char filepath[] = "test/test.ini";
     FILE *fp = fopen(filepath, "w");
     char content[] = " USER=root \r\n [COMMON] \n DB=sys   	\nPASSWD=tt   \n#commit   \n ;--------- \n[DEFINE] \nname=cxy\n";
     fwrite(content, sizeof(char), strlen(content), fp);
     fclose(fp);
 
-    //test
     IniFile ini;
-    ini.load(filepath);
+    ini.Load(filepath);
 
-    ini.deleteKey("COMMON", "DB");
+    ini.DeleteKey("COMMON", "DB");
 
     char saveas_path[] = "test/test_save_deleteK.ini";
 
-    ini.saveas(saveas_path);
+    ini.SaveAs(saveas_path);
 
     fp = fopen(saveas_path, "r");
     char buf[200];
@@ -265,7 +260,7 @@ TEST(IniFile, deleteKey)
 
     fread(buf, sizeof(char), 200, fp);
     fclose(fp);
-    EXPECT_EQ(buf, std::string("USER=root\n[COMMON]\nPASSWD=tt\n#commit\n;---------\n[DEFINE]\nname=cxy\n"));
+    EXPECT_EQ(buf, string("USER=root\n[COMMON]\nPASSWD=tt\n#commit\n;---------\n[DEFINE]\nname=cxy\n"));
 }
 
 }
