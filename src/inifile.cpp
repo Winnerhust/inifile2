@@ -33,7 +33,6 @@
 #include <fstream>
 #include "inifile.h"
 
-using namespace std;
 namespace inifile
 {
 
@@ -69,7 +68,7 @@ bool IniFile::parse(const std::string &content, std::string &key,
     size_t pos_eq = content.find_first_of(c);  // 找到'='的位置
     size_t pb1, pb2, pb3;  // position of blank 1 /2 /3
 
-    if (pos_eq != string::npos) {
+    if (pos_eq != std::string::npos) {
         key = std::string(content, 0, pos_eq);  // pos_eq为key长度，包含key右边的空格
         value = std::string(content, pos_eq + 1);  // 截取=号右边的字符, pos_eq为=号位置
 
@@ -149,9 +148,9 @@ int IniFile::load(const std::string &filename)
     std::string comment;
     std::string right_comment;
 
-    ifstream ifs(fname_);
+    std::ifstream ifs(fname_);
     if (!ifs.is_open()) {
-        cout << "open file failed\n";
+        std::cout << "open file failed\n";
         return -1;
     }
 
@@ -173,17 +172,17 @@ int IniFile::load(const std::string &filename)
         // 如果该行以注释开头，添加到comment，跳过当前循环，continue
         if (isComment(line)) {
             comment += line + delim;
-            cout << "comment=\n" << comment;
+            std::cout << "comment=\n" << comment;
             continue;
         } else {  // 如果行首不是注释，查找行尾是否存在注释，若存在，切割该行，将注释内容添加到right_comment
             std::string leftstr = "";
             std::string rightstr = "";
             // 去掉注释，若行尾没有注释，不改变原数据
             for (size_t i = 0; i < flags_.size(); ++i) {
-                if (split(line, leftstr, rightstr, flags_[i]) != string::npos) {
+                if (split(line, leftstr, rightstr, flags_[i]) != std::string::npos) {
                     line = leftstr;  // 更新line，只含数据不含注释
-                    cout << "leftstr = " <<line << endl;
-                    cout << "rightstr = " <<rightstr << endl;
+                    std::cout << "leftstr = " <<line << std::endl;
+                    std::cout << "rightstr = " <<rightstr << std::endl;
                     break;
                 }
             }
@@ -201,7 +200,7 @@ int IniFile::load(const std::string &filename)
             // 查找右中括号
             size_t index = line.find_first_of(']');
 
-            if (index == string::npos) {
+            if (index == std::string::npos) {
                 ifs.close();
                 fprintf(stderr, "没有找到匹配的]\n");
                 return -1;
@@ -256,8 +255,8 @@ int IniFile::load(const std::string &filename)
                 item.blank1 = blank1;
                 item.blank2 = blank2;
                 item.blank3 = blank3;
-                cout << "item.comment=" << comment << endl;
-                cout << "item.right_comment=" << right_comment << endl;
+                std::cout << "item.comment=" << comment << std::endl;
+                std::cout << "item.right_comment=" << right_comment << std::endl;
 
                 section->items.push_back(item);
             } else {
@@ -283,7 +282,7 @@ int IniFile::save()
 int IniFile::saveas(const std::string &filename)
 {
     std::string data = "";
-    cout << "############ saveas start ############" << endl;
+    std::cout << "############ saveas start ############" << std::endl;
     /* 载入section数据 */
     for (IniSection_it sect = sections_vt.begin(); sect != sections_vt.end(); ++sect) {
         if ((*sect)->comment != "") {
@@ -320,10 +319,10 @@ int IniFile::saveas(const std::string &filename)
         }
     }
 
-    ofstream ofs(filename);
+    std::ofstream ofs(filename);
     ofs << data;
     ofs.close();
-    cout << "############ saveas end ############" << endl;
+    std::cout << "############ saveas end ############" << std::endl;
     return 0;
 }
 
@@ -662,7 +661,7 @@ bool IniFile::isComment(const std::string &str)
 /*--------------------------------------------------------------------------*/
 void IniFile::print()
 {
-    cout << "############ print start ############" << endl;
+    std::cout << "############ print start ############" << std::endl;
     printf("filename:[%s]\n", fname_.c_str());
 
     printf("flags_:[");
@@ -689,7 +688,7 @@ void IniFile::print()
         }
     }
 
-    cout << "############ print end ############" << endl;
+    std::cout << "############ print end ############" << std::endl;
 }
 
 void IniFile::trimleft(std::string &str, char c /*=' '*/)
@@ -766,7 +765,7 @@ size_t IniFile::split(std::string &str, std::string &left_str, std::string &righ
 {
     size_t pos = str.find(seperator);
 
-    if (pos != string::npos) {
+    if (pos != std::string::npos) {
         left_str = std::string(str, 0, pos);
         right_str = std::string(str, pos);
     }

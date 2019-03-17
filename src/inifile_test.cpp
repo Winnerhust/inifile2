@@ -146,9 +146,9 @@ TEST(IniFile, hasSection_and_getValue)
     //test
     IniFile ini;
     ini.load(filepath);
-    /*cout<<"---------------\n"<<endl;
+    /*std::cout<<"---------------\n"<<std::endl;
     ini.print();
-    cout<<"---------------\n"<<endl;
+    std::cout<<"---------------\n"<<std::endl;
     */
     EXPECT_EQ(ini.hasSection(std::string("")), true);
     EXPECT_EQ(ini.hasSection("COMMON"), true);
