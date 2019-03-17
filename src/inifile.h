@@ -137,7 +137,6 @@ class IniFile
  private:
     IniSection *getSection(const std::string &section = "");
     void release();
-    int getline(std::string &str, FILE *fp);
     size_t split(std::string &str, std::string &left_str, std::string &right_str, std::string &seperator);
     bool isComment(const std::string &str);
     bool parse(const std::string &content, std::string &key, std::string &blank1, std::string &blank2, std::string &value, std::string &blank3, char c = '=');

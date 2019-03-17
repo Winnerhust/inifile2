@@ -91,49 +91,6 @@ TEST(IniFile, pasre)
     EXPECT_EQ(value, "sys");
 }
 
-
-
-//////////////////////
-TEST(IniFile, getline)
-{
-    //create a new ini file
-    char filepath[] = "test/test.ini";
-    FILE *fp = fopen(filepath, "w+");
-    char content[] = " USER=root \r\n [COMMON] \n DB=sys   	\nPASSWD=tt   \n#commit   \n ;--------- \n[DEFINE] \nname=cxy\n";
-    fwrite(content, 1, sizeof(content), fp);
-    fclose(fp);
-
-    //test
-    IniFile ini;
-    std::string line;
-    fp = fopen(filepath, "r");
-
-    ini.getline(line, fp);
-    IniFile::trimright(line, '\n');
-    IniFile::trimright(line, '\r');
-    IniFile::trim(line);
-    EXPECT_EQ(line, "USER=root");
-
-    ini.getline(line, fp);
-    IniFile::trimright(line, '\n');
-    IniFile::trimright(line, '\r');
-    IniFile::trim(line);
-    EXPECT_EQ(line, "[COMMON]");
-
-    ini.getline(line, fp);
-    IniFile::trimright(line, '\n');
-    IniFile::trimright(line, '\r');
-    IniFile::trim(line);
-    EXPECT_EQ(line, "DB=sys");
-
-    ini.getline(line, fp);
-    ini.getline(line, fp);
-    IniFile::trimright(line, '\n');
-    IniFile::trimright(line, '\r');
-    IniFile::trim(line);
-    EXPECT_EQ(line, "#commit");
-    fclose(fp);
-}
 TEST(IniFile, hasSection_and_getValue)
 {
     //create a new ini file

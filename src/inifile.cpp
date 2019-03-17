@@ -36,8 +36,6 @@
 namespace inifile
 {
 
-int INI_BUF_SIZE = 2048;
-
 // 构造函数，会初始化注释字符集合flags_（容器），目前只使用#和;作为注释前缀
 IniFile::IniFile()
 {
@@ -85,57 +83,6 @@ bool IniFile::parse(const std::string &content, std::string &key,
     }
 
     return false;
-}
-
-/* 读取一行数据，返回string和长度 */
-int IniFile::getline(std::string &str, FILE *fp)
-{
-    int plen = 0;
-    int buf_size = INI_BUF_SIZE * sizeof(char);
-
-    char *buf = (char *) malloc(buf_size);
-    char *pbuf = NULL;
-    char *p = buf;
-
-    if (buf == NULL) {
-        fprintf(stderr, "no enough memory!exit!\n");
-        exit(-1);
-    }
-
-    memset(buf, 0, buf_size);
-    // 假定总长度为buf长度
-    int total_size = buf_size;
-
-    while (fgets(p, buf_size, fp) != NULL) {
-        plen = strlen(p);
-
-        // 如果得到的字符串长度不为0 && 末尾字符不是回车符&&也没有到达文件末尾
-        // 则说明确实还没读够一行，需要继续分配空间，继续读行。
-        if (plen > 0 && p[plen - 1] != '\n' && !feof(fp)) {
-            total_size = strlen(buf) + buf_size;
-            pbuf = (char *)realloc(buf, total_size);
-
-            if (pbuf == NULL) {
-                free(buf);
-                fprintf(stderr, "no enough memory!exit!\n");
-                exit(-1);
-            }
-
-            buf = pbuf;
-
-            p = buf + strlen(buf);
-
-            continue;
-        } else {
-            break;
-        }
-    }
-
-    str = buf;
-
-    free(buf);
-    buf = NULL;
-    return str.length();
 }
 
 int IniFile::load(const std::string &filename)
@@ -784,4 +731,3 @@ int IniFile::StringCmpIgnoreCase(const std::string &str1, const std::string &str
 }
 
 }  /* namespace inifile */
-
