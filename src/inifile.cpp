@@ -62,25 +62,16 @@ IniFile::IniFile()
  * @return  bool
  */
 /* ----------------------------------------------------------------------------*/
-bool IniFile::parse(const string &content, string &key,
-                    string &blank1, string &blank2, string &value, string &blank3, char c /*= '='*/)
+bool IniFile::parse(const string &content, string &key, string &value, char c /*= '='*/)
 {
     size_t pos_eq = content.find_first_of(c);  // 找到'='的位置
-    size_t pb1, pb2, pb3;  // position of blank 1 /2 /3
 
     if (pos_eq != string::npos) {
         key = string(content, 0, pos_eq);  // pos_eq为key长度，包含key右边的空格
         value = string(content, pos_eq + 1);  // 截取=号右边的字符, pos_eq为=号位置
 
-        // 若文本形如：a = b #, 则key = a_, value = _b_，其中_代表空格
-
-        pb1 = key.find_last_not_of(" ");
-        blank1 = string(key, pb1 + 1);  // pb1为key最后的非空字符，则pb1+1为key的空白起始位置
-        pb2 = value.find_first_not_of(" ");  // pb2为value第一个非空字符位置，等于blank2长度
-        pb3 = value.find_last_not_of(" ");
-        blank2 = string(value, 0, pb2);
-        blank3 = string(value, pb3 + 1);  // pb3为value倒数找到第一个非空字符，则pb3+1为blank3起始位置
-
+        trim(key);
+        trim(value);
         return true;
     }
 
@@ -188,9 +179,9 @@ int IniFile::Load(const string &filename)
         // 如果该行是键值，添加到section段的items容器
         } else {
             trimleft(line);
-            string key, blank1, blank2, value, blank3;
+            string key, value;
 
-            if (parse(line, key, blank1, blank2, value, blank3)) {
+            if (parse(line, key, value)) {
                 IniItem item;
                 trim(key);
                 trim(value);
@@ -198,9 +189,6 @@ int IniFile::Load(const string &filename)
                 item.value = value;
                 item.comment = comment;
                 item.right_comment = right_comment;
-                item.blank1 = blank1;
-                item.blank2 = blank2;
-                item.blank3 = blank3;
                 cout << "item.comment=" << comment << endl;
                 cout << "item.right_comment=" << right_comment << endl;
 
@@ -253,10 +241,10 @@ int IniFile::SaveAs(const string &filename)
                 }
             }
 
-            data += item->key + item->blank1 + "=" + item->blank2 + item->value + item->blank3;
+            data += item->key + "=" + item->value;
 
             if (item->right_comment != "") {
-                data += item->right_comment;
+                data += " " + item->right_comment;
             }
 
             if (data[data.length()-1] != '\n') {

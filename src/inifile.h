@@ -44,10 +44,7 @@ const int RET_ERR = -1;
 const char delim[] = "\n";
 struct IniItem {
     string key;
-    string blank1;
-    string blank2;
     string value;
-    string blank3;
     string comment;  // 每个键的注释，都是指该行上方的内容
     string right_comment;
 };
@@ -145,7 +142,7 @@ class IniFile
     void release();
     size_t split(string &str, string &left_str, string &right_str, string &seperator);
     bool IsCommentLine(const string &str);
-    bool parse(const string &content, string &key, string &blank1, string &blank2, string &value, string &blank3, char c = '=');
+    bool parse(const string &content, string &key, string &value, char c = '=');
     // for debug
     void print();
 
