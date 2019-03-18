@@ -125,7 +125,7 @@ class IniFile
     /*删除特定段的特定参数*/
     void DeleteKey(const string &section, const string &key);
     /*设置注释标记符列表*/
-    void SetCommentFlags(const vector<string> &flags);
+    void SetCommentHead(const string &head);
  private:
     /* 获取section段所有键为key的值,并将值赋到values的vector中,,将注释赋到comments的vector中 */
     int GetValues(const string &section, const string &key, vector<string> *value, vector<string> *comments);
@@ -144,7 +144,7 @@ class IniFile
     IniSection *getSection(const string &section = "");
     void release();
     size_t split(string &str, string &left_str, string &right_str, string &seperator);
-    bool isComment(const string &str);
+    bool IsCommentLine(const string &str);
     bool parse(const string &content, string &key, string &blank1, string &blank2, string &value, string &blank3, char c = '=');
     // for debug
     void print();
@@ -156,12 +156,13 @@ class IniFile
     int getValue(const string &section, const string &key, string *value, string *comment);
 
     int StringCmpIgnoreCase(const string &str1, const string &str2);
+    bool StartWith(const string &str, const string &prefix);
 
  private:
     typedef vector<IniSection *>::iterator IniSection_it;
     vector<IniSection *> sections_vt;  // 用于存储段集合的vector容器
     string fname_;
-    vector<string> flags_;
+    string commentHead;
 };
 
 }  // endof namespace inifile

@@ -42,8 +42,7 @@ namespace inifile
 // 构造函数，会初始化注释字符集合flags_（容器），目前只使用#和;作为注释前缀
 IniFile::IniFile()
 {
-    flags_.push_back("#");
-    flags_.push_back(";");
+    commentHead = "#";
     IniSection *section = NULL;  // 初始化一个字段指针
     /*增加默认段，即 无名段""，避免执行setValue("", "NAME", "cxy", "")函数时，会把无名段添加到sections_vt末尾 */
     section = new IniSection();
@@ -120,7 +119,7 @@ int IniFile::Load(const string &filename)
         // step 1
         // 如果行首不是注释，查找行尾是否存在注释
         // 如果该行以注释开头，添加到comment，跳过当前循环，continue
-        if (isComment(line)) {
+        if (IsCommentLine(line)) {
             comment += line + delim;
             cout << "comment=\n" << comment;
             continue;
@@ -128,13 +127,10 @@ int IniFile::Load(const string &filename)
             string leftstr = "";
             string rightstr = "";
             // 去掉注释，若行尾没有注释，不改变原数据
-            for (size_t i = 0; i < flags_.size(); ++i) {
-                if (split(line, leftstr, rightstr, flags_[i]) != string::npos) {
-                    line = leftstr;  // 更新line，只含数据不含注释
-                    cout << "leftstr = " <<line << endl;
-                    cout << "rightstr = " <<rightstr << endl;
-                    break;
-                }
+            if (split(line, leftstr, rightstr, commentHead) != string::npos) {
+                line = leftstr;  // 更新line，只含数据不含注释
+                cout << "leftstr = " <<line << endl;
+                cout << "rightstr = " <<rightstr << endl;
             }
 
             //  取出注释内容rightstr，放入right_comment
@@ -467,7 +463,7 @@ int IniFile::setValue(const string &section, const string &key, const string &va
     string comt = comment;
 
     if (comt != "") {
-        comt = flags_[0] + comt;
+        comt = commentHead + comt;
     }
 
     if (sect == NULL) {
@@ -530,9 +526,9 @@ int IniFile::SetBoolValue(const string &section, const string &key, bool value)
     }
 }
 
-void IniFile::SetCommentFlags(const vector<string> &flags)
+void IniFile::SetCommentHead(const string &head)
 {
-    flags_ = flags;
+    commentHead = head;
 }
 
 void IniFile::DeleteSection(const string &section)
@@ -587,30 +583,9 @@ void IniFile::release()
   @return   如果是注释则为真
  */
 /*--------------------------------------------------------------------------*/
-bool IniFile::isComment(const string &str)
+bool IniFile::IsCommentLine(const string &str)
 {
-    bool ret = false;
-
-    for (size_t i = 0; i < flags_.size(); ++i) {
-        size_t k = 0;
-
-        if (str.length() < flags_[i].length()) {
-            continue;
-        }
-
-        for (k = 0; k < flags_[i].length(); ++k) {
-            if (str[k] != flags_[i][k]) {
-                break;
-            }
-        }
-
-        if (k == flags_[i].length()) {
-            ret = true;
-            break;
-        }
-    }
-
-    return ret;
+    return StartWith(str, commentHead);
 }
 
 /*-------------------------------------------------------------------------*/
@@ -625,13 +600,7 @@ void IniFile::print()
     cout << "############ print start ############" << endl;
     printf("filename:[%s]\n", fname_.c_str());
 
-    printf("flags_:[");
-
-    for (size_t i = 0; i < flags_.size(); ++i) {
-        printf(" %s ", flags_[i].c_str());
-    }
-
-    printf("]\n");
+    printf("commentHead:[%s]\n", commentHead.c_str());
 
     for (IniSection_it it = sections_vt.begin(); it != sections_vt.end(); ++it) {
         printf("comment :[\n%s]\n", (*it)->comment.c_str());
@@ -650,6 +619,15 @@ void IniFile::print()
     }
 
     cout << "############ print end ############" << endl;
+}
+
+bool IniFile::StartWith(const string &str, const string &prefix)
+{
+    if (strncmp(str.c_str(), prefix.c_str(), prefix.size()) == 0) {
+        return true;
+    }
+
+    return false;
 }
 
 void IniFile::trimleft(string &str, char c /*=' '*/)

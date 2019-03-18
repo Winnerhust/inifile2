@@ -99,7 +99,7 @@ TEST(IniFile, hasSection_and_getValue)
     // create a new ini file
     char filepath[] = "test/test.ini";
     FILE *fp = fopen(filepath, "w+");
-    char content[] = " USER=root \r\n [COMMON] \n DB=sys   	\nPASSWD=tt   \n#commit   \n ;--------- \n[DEFINE] \nname=cxy\nvalue=1\nbooltest=True #测试\n";
+    char content[] = " USER=root \r\n [COMMON] \n DB=sys   	\nPASSWD=tt   \n#commit   \n #--------- \n[DEFINE] \nname=cxy\nvalue=1\nbooltest=True #测试\n";
     fwrite(content, 1, strlen(content), fp);
     fclose(fp);
 
@@ -134,7 +134,7 @@ TEST(IniFile, reopen)
     // create a new ini file
     char filepath[] = "test/test.ini";
     FILE *fp = fopen(filepath, "w");
-    char content[] = " USER=root \r\n [COMMON] \n DB=sys   	\nPASSWD=tt   \n#commit   \n ;--------- \n[DEFINE] \nname=cxy\n";
+    char content[] = " USER=root \r\n [COMMON] \n DB=sys   	\nPASSWD=tt   \n#commit   \n #--------- \n[DEFINE] \nname=cxy\n";
     fwrite(content, sizeof(char), strlen(content), fp);
     fclose(fp);
 
@@ -145,7 +145,7 @@ TEST(IniFile, reopen)
     // reopen
 
     fp = fopen(filepath, "w");
-    strcpy(content, " USER=root2 \r\n [COMMON] \n DB=sys2   	\n\n#commit   \n ;--------- \n\n\n");
+    strcpy(content, " USER=root2 \r\n [COMMON] \n DB=sys2   	\n\n#commit   \n #--------- \n\n\n");
     fwrite(content, sizeof(char), strlen(content), fp);
     fclose(fp);
 
@@ -170,7 +170,7 @@ TEST(IniFile, SaveAs)
     // create a new ini file
     char filepath[] = "test/test.ini";
     FILE *fp = fopen(filepath, "w");
-    char content[] = " USER=root \r\n [COMMON] \n DB=sys   	\nPASSWD=tt   \n#commit   \n ;--------- \n[DEFINE] \nname=cxy\nvalue=1 #测试";
+    char content[] = " USER=root \r\n [COMMON] \n DB=sys   	\nPASSWD=tt   \n#commit   \n #--------- \n[DEFINE] \nname=cxy\nvalue=1 #测试";
     fwrite(content, sizeof(char), strlen(content), fp);
     fclose(fp);
 
@@ -187,7 +187,7 @@ TEST(IniFile, SaveAs)
 
     fread(buf, sizeof(char), 200, fp);
     fclose(fp);
-    EXPECT_EQ(buf, string("USER=root\n[COMMON]\nDB=sys\nPASSWD=tt\n#commit\n;---------\n[DEFINE]\nname=cxy\nvalue=1 #测试\n"));
+    EXPECT_EQ(buf, string("USER=root\n[COMMON]\nDB=sys\nPASSWD=tt\n#commit\n#---------\n[DEFINE]\nname=cxy\nvalue=1 #测试\n"));
 }
 
 TEST(IniFile, setValue)
@@ -214,7 +214,7 @@ TEST(IniFile, DeleteSection)
     // create a new ini file
     char filepath[] = "test/test.ini";
     FILE *fp = fopen(filepath, "w");
-    char content[] = " USER=root \r\n [COMMON] \n DB=sys   	\nPASSWD=tt   \n#commit   \n ;--------- \n[DEFINE] \nname=cxy\n";
+    char content[] = " USER=root \r\n [COMMON] \n DB=sys   	\nPASSWD=tt   \n#commit   \n #--------- \n[DEFINE] \nname=cxy\n";
     fwrite(content, sizeof(char), strlen(content), fp);
     fclose(fp);
 
@@ -233,7 +233,7 @@ TEST(IniFile, DeleteSection)
 
     fread(buf, sizeof(char), 200, fp);
     fclose(fp);
-    EXPECT_EQ(buf, string("USER=root\n#commit\n;---------\n[DEFINE]\nname=cxy\n"));
+    EXPECT_EQ(buf, string("USER=root\n#commit\n#---------\n[DEFINE]\nname=cxy\n"));
 }
 
 TEST(IniFile, DeleteKey)
@@ -241,7 +241,7 @@ TEST(IniFile, DeleteKey)
     // create a new ini file
     char filepath[] = "test/test.ini";
     FILE *fp = fopen(filepath, "w");
-    char content[] = " USER=root \r\n [COMMON] \n DB=sys   	\nPASSWD=tt   \n#commit   \n ;--------- \n[DEFINE] \nname=cxy\n";
+    char content[] = " USER=root \r\n [COMMON] \n DB=sys   	\nPASSWD=tt   \n#commit   \n #--------- \n[DEFINE] \nname=cxy\n";
     fwrite(content, sizeof(char), strlen(content), fp);
     fclose(fp);
 
@@ -260,7 +260,7 @@ TEST(IniFile, DeleteKey)
 
     fread(buf, sizeof(char), 200, fp);
     fclose(fp);
-    EXPECT_EQ(buf, string("USER=root\n[COMMON]\nPASSWD=tt\n#commit\n;---------\n[DEFINE]\nname=cxy\n"));
+    EXPECT_EQ(buf, string("USER=root\n[COMMON]\nPASSWD=tt\n#commit\n#---------\n[DEFINE]\nname=cxy\n"));
 }
 
 }
