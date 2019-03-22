@@ -76,8 +76,6 @@ TEST(IniFile, pasre)
     key = value = "";
 
     EXPECT_EQ(section.parse(s, key, value), false);
-    EXPECT_EQ(key, "");
-    EXPECT_EQ(value, "");
 
     s = "DB=";
     key = value = "";

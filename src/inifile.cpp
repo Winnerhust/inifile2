@@ -62,20 +62,9 @@ IniFile::IniFile()
  * @return  bool
  */
 /* ----------------------------------------------------------------------------*/
-bool IniFile::parse(const string &content, string &key, string &value, char c /*= '='*/)
+bool IniFile::parse(const string &content, string &key, string &value)
 {
-    size_t pos_eq = content.find_first_of(c);  // 找到'='的位置
-
-    if (pos_eq != string::npos) {
-        key = string(content, 0, pos_eq);  // pos_eq为key长度，包含key右边的空格
-        value = string(content, pos_eq + 1);  // 截取=号右边的字符, pos_eq为=号位置
-
-        trim(key);
-        trim(value);
-        return true;
-    }
-
-    return false;
+    return split(content, "=", key, value);
 }
 
 int IniFile::Load(const string &filename)
@@ -85,6 +74,7 @@ int IniFile::Load(const string &filename)
     IniSection *section = NULL;  // 初始化一个字段指针
 
     string line;
+    string cleanLine;
     string comment;
     string right_comment;
 
@@ -112,30 +102,22 @@ int IniFile::Load(const string &filename)
         // 如果该行以注释开头，添加到comment，跳过当前循环，continue
         if (IsCommentLine(line)) {
             comment += line + delim;
-            cout << "comment=\n" << comment;
             continue;
-        } else {  // 如果行首不是注释，查找行尾是否存在注释，若存在，切割该行，将注释内容添加到right_comment
-            string leftstr = "";
-            string rightstr = "";
-            // 去掉注释，若行尾没有注释，不改变原数据
-            if (split(line, leftstr, rightstr, commentHead) != string::npos) {
-                line = leftstr;  // 更新line，只含数据不含注释
-                cout << "leftstr = " <<line << endl;
-                cout << "rightstr = " <<rightstr << endl;
-            }
-
-            //  取出注释内容rightstr，放入right_comment
-            if (rightstr.length()) {
-                right_comment += rightstr + delim;
-            }
         }
+
+        // 如果行首不是注释，查找行尾是否存在注释，若存在，切割该行，将注释内容添加到right_comment
+        split(line, commentHead, cleanLine, right_comment);
+
+        cout << "cleanLine=" <<cleanLine << endl;
+        cout << "comment=\n" << comment;
+        cout << "right_comment=" <<right_comment << endl;
 
         // step 2，判断line内容是否为段或键
         //段开头查找 [
-        if (line[0] == '[') {
+        if (cleanLine[0] == '[') {
             section = NULL;
             // 查找右中括号
-            size_t index = line.find_first_of(']');
+            size_t index = cleanLine.find_first_of(']');
 
             if (index == string::npos) {
                 ifs.close();
@@ -151,7 +133,7 @@ int IniFile::Load(const string &filename)
             }
 
             // 取段名
-            string s(line, 1, len);
+            string s(cleanLine, 1, len);
 
             trim(s);
 
@@ -178,10 +160,10 @@ int IniFile::Load(const string &filename)
 
         // 如果该行是键值，添加到section段的items容器
         } else {
-            trimleft(line);
+            trimleft(cleanLine);
             string key, value;
 
-            if (parse(line, key, value)) {
+            if (parse(cleanLine, key, value)) {
                 IniItem item;
                 trim(key);
                 trim(value);
@@ -194,7 +176,7 @@ int IniFile::Load(const string &filename)
 
                 section->items.push_back(item);
             } else {
-                fprintf(stderr, "解析参数失败[%s]\n", line.c_str());
+                fprintf(stderr, "解析参数失败[%s]\n", cleanLine.c_str());
             }
 
             // comment清零
@@ -203,7 +185,7 @@ int IniFile::Load(const string &filename)
         }
     }
 
-        ifs.close();
+    ifs.close();
 
     return 0;
 }
@@ -229,7 +211,7 @@ int IniFile::SaveAs(const string &filename)
         }
 
         if ((*sect)->right_comment != "") {
-            data += (*sect)->right_comment;
+            data += " " + commentHead +(*sect)->right_comment;
         }
 
         /* 载入item数据 */
@@ -244,7 +226,7 @@ int IniFile::SaveAs(const string &filename)
             data += item->key + "=" + item->value;
 
             if (item->right_comment != "") {
-                data += " " + item->right_comment;
+                data += " " + commentHead + item->right_comment;
             }
 
             if (data[data.length()-1] != '\n') {
@@ -683,21 +665,29 @@ void IniFile::trim(string &str)
   @brief    split，用分隔符切割字符串
   @param    str 输入字符串
   @param    left_str 分隔后得到的左字符串
-  @param    right_str 分隔后得到的右字符串（包含seperator）
+  @param    right_str 分隔后得到的右字符串（不包含seperator）
   @param    seperator 分隔符
   @return   pos
  */
 /*--------------------------------------------------------------------------*/
-size_t IniFile::split(string &str, string &left_str, string &right_str, string &seperator)
+bool IniFile::split(const string &str, const string &sep, string &left, string &right)
 {
-    size_t pos = str.find(seperator);
+    size_t pos = str.find(sep);
 
     if (pos != string::npos) {
-        left_str = string(str, 0, pos);
-        right_str = string(str, pos);
-    }
+        left = string(str, 0, pos);
+        right = string(str, pos+1);
 
-    return pos;
+        trim(left);
+        trim(right);
+        return true;
+    } else {
+        left = str;
+        right = "";
+
+        trim(left);
+        return false;
+    }
 }
 
 int IniFile::StringCmpIgnoreCase(const string &str1, const string &str2)

@@ -140,9 +140,9 @@ class IniFile
  private:
     IniSection *getSection(const string &section = "");
     void release();
-    size_t split(string &str, string &left_str, string &right_str, string &seperator);
+    bool split(const string &str, const string &sep, string &left, string &right);
     bool IsCommentLine(const string &str);
-    bool parse(const string &content, string &key, string &value, char c = '=');
+    bool parse(const string &content, string &key, string &value);
     // for debug
     void print();
 
