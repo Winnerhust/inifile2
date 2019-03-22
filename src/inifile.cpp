@@ -41,12 +41,8 @@ namespace inifile
 
 // 构造函数，会初始化注释字符集合flags_（容器），目前只使用#和;作为注释前缀
 IniFile::IniFile()
+:commentHead("#")
 {
-    commentHead = "#";
-    IniSection *section = NULL;  // 初始化一个字段指针
-    /*增加默认段，即 无名段""，避免执行setValue("", "NAME", "cxy", "")函数时，会把无名段添加到sections_vt末尾 */
-    section = new IniSection();
-    sections_vt.push_back(section);
 }
 
 //解析一行数据，得到键值
@@ -62,22 +58,91 @@ IniFile::IniFile()
  * @return  bool
  */
 /* ----------------------------------------------------------------------------*/
-bool IniFile::parse(const string &content, string &key, string &value)
+bool IniFile::parse(const string &content, string *key, string *value)
 {
     return split(content, "=", key, value);
 }
 
+int IniFile::UpdateSection(const string &cleanLine, const string &comment,
+                           const string &rightComment, IniSection **section)
+{
+    IniSection *newSection;
+    // 查找右中括号
+    size_t index = cleanLine.find_first_of(']');
+    if (index == string::npos) {
+        fprintf(stderr, "没有找到匹配的]\n");
+        return -1;
+    }
+
+    int len = index - 1;
+    // 若段名为空，继续下一行
+    if (len <= 0) {
+        fprintf(stderr, "段为空\n");
+        return -1;
+    }
+
+    // 取段名
+    string s(cleanLine, 1, len);
+
+    trim(s);
+
+    //检查段是否已存在
+    if (getSection(s) != NULL) {
+        fprintf(stderr, "此段已存在:%s\n", s.c_str());
+        return -1;
+    }
+
+    // 申请一个新段，由于map容器会自动排序，打乱原有顺序，因此改用vector存储（sections_vt）
+    newSection = new IniSection();
+    // 填充段名
+    newSection->name = s;
+    // 填充段开头的注释
+    newSection->comment = comment;
+    newSection->rightComment = rightComment;
+
+    sections_vt.push_back(newSection);
+
+    *section = newSection;
+
+    printf("[%s]: section name = %s\n", __func__, s.c_str());
+    return 0;
+}
+
+int IniFile::AddKeyValuePair(const string &cleanLine, const string &comment,
+                             const string &rightComment, IniSection *section)
+{
+    string key, value;
+
+    if (!parse(cleanLine, &key, &value)) {
+        fprintf(stderr, "解析参数失败[%s]\n", cleanLine.c_str());
+        return -1;
+    }
+
+    IniItem item;
+    item.key = key;
+    item.value = value;
+    item.comment = comment;
+    item.rightComment = rightComment;
+    cout << "item.comment=" << comment << endl;
+    cout << "item.rightComment=" << rightComment << endl;
+
+    section->items.push_back(item);
+
+    return 0;
+}
+
 int IniFile::Load(const string &filename)
 {
-    release();
-    fname_ = filename;
-    IniSection *section = NULL;  // 初始化一个字段指针
-
-    string line;
-    string cleanLine;
+    int err;
+    string line;  // 带注释的行
+    string cleanLine;  // 去掉注释后的行
     string comment;
-    string right_comment;
+    string rightComment;
+    IniSection *currSection = NULL;  // 初始化一个字段指针
 
+    release();
+
+    fname_ = filename;
     std::ifstream ifs(fname_);
     if (!ifs.is_open()) {
         cout << "open file failed\n";
@@ -85,8 +150,10 @@ int IniFile::Load(const string &filename)
     }
 
     //增加默认段，即 无名段""
-    section = new IniSection();
-    sections_vt.push_back(section);
+    currSection = new IniSection();
+    currSection->name = "";
+    sections_vt.push_back(currSection);
+
     // 每次读取一行内容到line
     while (std::getline(ifs, line)) {
         trim(line);
@@ -105,84 +172,30 @@ int IniFile::Load(const string &filename)
             continue;
         }
 
-        // 如果行首不是注释，查找行尾是否存在注释，若存在，切割该行，将注释内容添加到right_comment
-        split(line, commentHead, cleanLine, right_comment);
+        // 如果行首不是注释，查找行尾是否存在注释，若存在，切割该行，将注释内容添加到rightComment
+        split(line, commentHead, &cleanLine, &rightComment);
 
         cout << "cleanLine=" <<cleanLine << endl;
-        cout << "comment=\n" << comment;
-        cout << "right_comment=" <<right_comment << endl;
+        cout << "comment=\n" << comment << endl;
+        cout << "rightComment=" <<rightComment << endl;
 
         // step 2，判断line内容是否为段或键
         //段开头查找 [
         if (cleanLine[0] == '[') {
-            section = NULL;
-            // 查找右中括号
-            size_t index = cleanLine.find_first_of(']');
-
-            if (index == string::npos) {
-                ifs.close();
-                fprintf(stderr, "没有找到匹配的]\n");
-                return -1;
-            }
-
-            int len = index - 1;
-            // 若段名为空，继续下一行
-            if (len <= 0) {
-                fprintf(stderr, "段为空\n");
-                continue;
-            }
-
-            // 取段名
-            string s(cleanLine, 1, len);
-
-            trim(s);
-
-            //检查段是否已存在
-            if (getSection(s) != NULL) {
-                ifs.close();
-                fprintf(stderr, "此段已存在:%s\n", s.c_str());
-                return -1;
-            }
-
-            // 申请一个新段，由于map容器会自动排序，打乱原有顺序，因此改用vector存储（sections_vt）
-            section = new IniSection();
-            sections_vt.push_back(section);
-
-            // 填充段名
-            section->name = s;
-            printf("[%s]: section name = %s\n", __func__, s.c_str());
-            // 填充段开头的注释
-            section->comment = comment;
-            section->right_comment = right_comment;
-            // comment清零
-            comment = "";
-            right_comment = "";
-
-        // 如果该行是键值，添加到section段的items容器
+            err = UpdateSection(cleanLine, comment, rightComment, &currSection);
         } else {
-            trimleft(cleanLine);
-            string key, value;
-
-            if (parse(cleanLine, key, value)) {
-                IniItem item;
-                trim(key);
-                trim(value);
-                item.key = key;
-                item.value = value;
-                item.comment = comment;
-                item.right_comment = right_comment;
-                cout << "item.comment=" << comment << endl;
-                cout << "item.right_comment=" << right_comment << endl;
-
-                section->items.push_back(item);
-            } else {
-                fprintf(stderr, "解析参数失败[%s]\n", cleanLine.c_str());
-            }
-
-            // comment清零
-            comment = "";
-            right_comment = "";
+            // 如果该行是键值，添加到section段的items容器
+             err = AddKeyValuePair(cleanLine, comment, rightComment, currSection);
         }
+
+        if (err != 0) {
+            ifs.close();
+            return err;
+        }
+
+        // comment清零
+        comment = "";
+        rightComment = "";
     }
 
     ifs.close();
@@ -210,8 +223,8 @@ int IniFile::SaveAs(const string &filename)
             data += delim;
         }
 
-        if ((*sect)->right_comment != "") {
-            data += " " + commentHead +(*sect)->right_comment;
+        if ((*sect)->rightComment != "") {
+            data += " " + commentHead +(*sect)->rightComment;
         }
 
         /* 载入item数据 */
@@ -225,8 +238,8 @@ int IniFile::SaveAs(const string &filename)
 
             data += item->key + "=" + item->value;
 
-            if (item->right_comment != "") {
-                data += " " + commentHead + item->right_comment;
+            if (item->rightComment != "") {
+                data += " " + commentHead + item->rightComment;
             }
 
             if (data[data.length()-1] != '\n') {
@@ -446,7 +459,12 @@ int IniFile::setValue(const string &section, const string &key, const string &va
         }
 
         sect->name = section;
-        sections_vt.push_back(sect);
+        if (sect->name == "") {
+            // 确保空section在第一个
+            sections_vt.insert(sections_vt.begin(), sect);
+        } else {
+            sections_vt.push_back(sect);
+        }
     }
 
     for (IniSection::IniItem_it it = sect->begin(); it != sect->end(); ++it) {
@@ -575,15 +593,15 @@ void IniFile::print()
     for (IniSection_it it = sections_vt.begin(); it != sections_vt.end(); ++it) {
         printf("comment :[\n%s]\n", (*it)->comment.c_str());
         printf("section :\n[%s]\n", (*it)->name.c_str());
-        if ((*it)->right_comment != "") {
-            printf("rcomment:\n%s", (*it)->right_comment.c_str());
+        if ((*it)->rightComment != "") {
+            printf("rcomment:\n%s", (*it)->rightComment.c_str());
         }
 
         for (IniSection::IniItem_it i = (*it)->items.begin(); i != (*it)->items.end(); ++i) {
             printf("    comment :[\n%s]\n", i->comment.c_str());
             printf("    parm    :%s=%s\n", i->key.c_str(), i->value.c_str());
-            if (i->right_comment != "") {
-                printf("    rcomment:[\n%s]\n", i->right_comment.c_str());
+            if (i->rightComment != "") {
+                printf("    rcomment:[\n%s]\n", i->rightComment.c_str());
             }
         }
     }
@@ -670,9 +688,10 @@ void IniFile::trim(string &str)
   @return   pos
  */
 /*--------------------------------------------------------------------------*/
-bool IniFile::split(const string &str, const string &sep, string &left, string &right)
+bool IniFile::split(const string &str, const string &sep, string *pleft, string *pright)
 {
     size_t pos = str.find(sep);
+    string left, right;
 
     if (pos != string::npos) {
         left = string(str, 0, pos);
@@ -680,12 +699,18 @@ bool IniFile::split(const string &str, const string &sep, string &left, string &
 
         trim(left);
         trim(right);
+
+        *pleft = left;
+        *pright = right;
         return true;
     } else {
         left = str;
         right = "";
 
         trim(left);
+
+        *pleft = left;
+        *pright = right;
         return false;
     }
 }

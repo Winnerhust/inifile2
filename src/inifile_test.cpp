@@ -68,26 +68,26 @@ TEST(IniFile, pasre)
     string s = "DB=sys";
     string key, value;
 
-    EXPECT_EQ(section.parse(s, key, value), true);
+    EXPECT_EQ(section.parse(s, &key, &value), true);
     EXPECT_EQ(key, "DB");
     EXPECT_EQ(value, "sys");
 
     s = "DB";
     key = value = "";
 
-    EXPECT_EQ(section.parse(s, key, value), false);
+    EXPECT_EQ(section.parse(s, &key, &value), false);
 
     s = "DB=";
     key = value = "";
 
-    EXPECT_EQ(section.parse(s, key, value), true);
+    EXPECT_EQ(section.parse(s, &key, &value), true);
     EXPECT_EQ(key, "DB");
     EXPECT_EQ(value, "");
 
     s = "=sys";
     key = value = "";
 
-    EXPECT_EQ(section.parse(s, key, value), true);
+    EXPECT_EQ(section.parse(s, &key, &value), true);
     EXPECT_EQ(key, "");
     EXPECT_EQ(value, "sys");
 }

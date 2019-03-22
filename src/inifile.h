@@ -46,7 +46,7 @@ struct IniItem {
     string key;
     string value;
     string comment;  // 每个键的注释，都是指该行上方的内容
-    string right_comment;
+    string rightComment;
 };
 
 struct IniSection {
@@ -61,7 +61,7 @@ struct IniSection {
 
     string name;
     string comment;  // 每个段的注释，都是指该行上方的内容
-    string right_comment;
+    string rightComment;
     vector<IniItem> items;  // 键值项数组，一个段可以有多个键值，所有用vector来储存
 };
 
@@ -139,10 +139,15 @@ class IniFile
     /* 将字符串str按分割符delim分割成多个子串 */
  private:
     IniSection *getSection(const string &section = "");
+    int UpdateSection(const string &cleanLine, const string &comment,
+                      const string &rightComment, IniSection **section);
+    int AddKeyValuePair(const string &cleanLine, const string &comment,
+                        const string &rightComment, IniSection *section);
+
     void release();
-    bool split(const string &str, const string &sep, string &left, string &right);
+    bool split(const string &str, const string &sep, string *left, string *right);
     bool IsCommentLine(const string &str);
-    bool parse(const string &content, string &key, string &value);
+    bool parse(const string &content, string *key, string *value);
     // for debug
     void print();
 
