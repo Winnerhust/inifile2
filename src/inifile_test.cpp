@@ -127,6 +127,30 @@ TEST(IniFile, hasSection_and_getValue)
     EXPECT_EQ(boolValue, true);
 }
 
+TEST(IniFile, getValue)
+{
+    // write config
+    char filepath[] = "test/getValueTest.ini";
+    FILE *fp = fopen(filepath, "w");
+    char content[] = " USER=root \r\n [COMMON] \n DB=sys \nPASSWD=tt \nPASSWD=dd \n#commit \n ;--------- \n[DEFINE] \nname=cxy\nvalue=1 #test";
+    fwrite(content, sizeof(char), strlen(content), fp);
+    fclose(fp);
+
+    // read config
+    IniFile ini;
+    ini.Load(filepath);
+    string value;
+    vector<string> valueList;
+    ini.getValue("", "USER", &value);
+    EXPECT_EQ(value, string("root"));
+    ini.getValue("COMMON", "DB", &value);
+    EXPECT_EQ(value, string("sys"));
+    ini.GetValues("COMMON", "PASSWD", &valueList);
+    EXPECT_EQ(valueList[0], string("tt"));
+    EXPECT_EQ(valueList[1], string("dd"));
+    EXPECT_EQ(valueList.size(), 2);
+}
+
 TEST(IniFile, reopen)
 {
     // create a new ini file
