@@ -631,10 +631,12 @@ void IniFile::DeleteKey(const string &section, const string &key)
     IniSection *sect = getSection(section);
 
     if (sect != NULL) {
-        for (IniSection::IniItem_it it = sect->begin(); it != sect->end(); ++it) {
+        for (IniSection::IniItem_it it = sect->begin(); it != sect->end();) {
             if (it->key == key) {
-                sect->items.erase(it);
+                it = sect->items.erase(it);
                 break;
+            } else {
+                it++;
             }
         }
     }
