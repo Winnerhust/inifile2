@@ -41,7 +41,7 @@ namespace inifile
 
 // 构造函数，会初始化注释字符集合flags_（容器），目前只使用#和;作为注释前缀
 IniFile::IniFile()
-:commentHead("#")
+:commentDelimiter("#")
 {
 }
 
@@ -131,7 +131,7 @@ int IniFile::AddKeyValuePair(const string &cleanLine, const string &comment,
     return 0;
 }
 
-int IniFile::Load(const string &filename)
+int IniFile::Load(const string &filePath)
 {
     int err;
     string line;  // 带注释的行
@@ -142,8 +142,8 @@ int IniFile::Load(const string &filename)
 
     release();
 
-    fname_ = filename;
-    std::ifstream ifs(fname_);
+    iniFilePath = filePath;
+    std::ifstream ifs(iniFilePath);
     if (!ifs.is_open()) {
         cout << "open file failed\n";
         return -1;
@@ -173,7 +173,7 @@ int IniFile::Load(const string &filename)
         }
 
         // 如果行首不是注释，查找行尾是否存在注释，若存在，切割该行，将注释内容添加到rightComment
-        split(line, commentHead, &cleanLine, &rightComment);
+        split(line, commentDelimiter, &cleanLine, &rightComment);
 
         cout << "cleanLine=" <<cleanLine << endl;
         cout << "comment=\n" << comment << endl;
@@ -205,10 +205,10 @@ int IniFile::Load(const string &filename)
 
 int IniFile::Save()
 {
-    return SaveAs(fname_);
+    return SaveAs(iniFilePath);
 }
 
-int IniFile::SaveAs(const string &filename)
+int IniFile::SaveAs(const string &filePath)
 {
     string data = "";
     cout << "############ SaveAs start ############" << endl;
@@ -224,7 +224,7 @@ int IniFile::SaveAs(const string &filename)
         }
 
         if ((*sect)->rightComment != "") {
-            data += " " + commentHead +(*sect)->rightComment;
+            data += " " + commentDelimiter +(*sect)->rightComment;
         }
 
         /* 载入item数据 */
@@ -239,7 +239,7 @@ int IniFile::SaveAs(const string &filename)
             data += item->key + "=" + item->value;
 
             if (item->rightComment != "") {
-                data += " " + commentHead + item->rightComment;
+                data += " " + commentDelimiter + item->rightComment;
             }
 
             if (data[data.length()-1] != '\n') {
@@ -248,7 +248,7 @@ int IniFile::SaveAs(const string &filename)
         }
     }
 
-    std::ofstream ofs(filename);
+    std::ofstream ofs(filePath);
     ofs << data;
     ofs.close();
     cout << "############ SaveAs end ############" << endl;
@@ -366,6 +366,54 @@ void IniFile::GetBoolValueOrDefault(const string &section, const string &key, bo
     return;
 }
 
+/* 获取注释，如果key=""则获取段注释 */
+int IniFile::GetComment(const string &section, const string &key, string *comment)
+{
+    IniSection *sect = getSection(section);
+
+    if (sect == NULL) {
+        return RET_ERR;
+    }
+
+    if (key == "") {
+        *comment = sect->comment;
+        return RET_OK;
+    }
+
+    for (IniSection::IniItem_it it = sect->begin(); it != sect->end(); ++it) {
+        if (it->key == key) {
+            *comment = it->comment;
+            return RET_OK;
+        }
+    }
+
+    return RET_ERR;
+}
+
+/* 获取行尾注释，如果key=""则获取段的行尾注释 */
+int IniFile::GetRightComment(const string &section, const string &key, string *rightComment)
+{
+    IniSection *sect = getSection(section);
+
+    if (sect == NULL) {
+        return RET_ERR;
+    }
+
+    if (key == "") {
+        *rightComment = sect->rightComment;
+        return RET_OK;
+    }
+
+    for (IniSection::IniItem_it it = sect->begin(); it != sect->end(); ++it) {
+        if (it->key == key) {
+            *rightComment = it->rightComment;
+            return RET_OK;
+        }
+    }
+
+    return RET_ERR;
+}
+
 int IniFile::getValue(const string &section, const string &key, string *value)
 {
     string comment;
@@ -446,7 +494,7 @@ int IniFile::setValue(const string &section, const string &key, const string &va
     string comt = comment;
 
     if (comt != "") {
-        comt = commentHead + comt;
+        comt = commentDelimiter + comt;
     }
 
     if (sect == NULL) {
@@ -514,9 +562,55 @@ int IniFile::SetBoolValue(const string &section, const string &key, bool value)
     }
 }
 
-void IniFile::SetCommentHead(const string &head)
+int IniFile::SetComment(const string &section, const string &key, const string &comment)
 {
-    commentHead = head;
+    IniSection *sect = getSection(section);
+
+    if (sect == NULL) {
+        return RET_ERR;
+    }
+
+    if (key == "") {
+        sect->comment = comment;
+        return RET_OK;
+    }
+
+    for (IniSection::IniItem_it it = sect->begin(); it != sect->end(); ++it) {
+        if (it->key == key) {
+            it->comment = comment;
+            return RET_OK;
+        }
+    }
+
+    return RET_ERR;
+}
+
+int IniFile::SetRightComment(const string &section, const string &key, const string &rightComment)
+{
+    IniSection *sect = getSection(section);
+
+    if (sect == NULL) {
+        return RET_ERR;
+    }
+
+    if (key == "") {
+        sect->rightComment = rightComment;
+        return RET_OK;
+    }
+
+    for (IniSection::IniItem_it it = sect->begin(); it != sect->end(); ++it) {
+        if (it->key == key) {
+            it->rightComment = rightComment;
+            return RET_OK;
+        }
+    }
+
+    return RET_ERR;
+}
+
+void IniFile::SetCommentDelimiter(const string &delimiter)
+{
+    commentDelimiter = delimiter;
 }
 
 void IniFile::DeleteSection(const string &section)
@@ -555,7 +649,7 @@ void IniFile::DeleteKey(const string &section, const string &key)
 /*--------------------------------------------------------------------------*/
 void IniFile::release()
 {
-    fname_ = "";
+    iniFilePath = "";
 
     for (IniSection_it it = sections_vt.begin(); it != sections_vt.end(); ++it) {
         delete (*it);  // 清除section
@@ -573,7 +667,7 @@ void IniFile::release()
 /*--------------------------------------------------------------------------*/
 bool IniFile::IsCommentLine(const string &str)
 {
-    return StartWith(str, commentHead);
+    return StartWith(str, commentDelimiter);
 }
 
 /*-------------------------------------------------------------------------*/
@@ -586,9 +680,9 @@ bool IniFile::IsCommentLine(const string &str)
 void IniFile::print()
 {
     cout << "############ print start ############" << endl;
-    printf("filename:[%s]\n", fname_.c_str());
+    printf("filePath:[%s]\n", iniFilePath.c_str());
 
-    printf("commentHead:[%s]\n", commentHead.c_str());
+    printf("commentDelimiter:[%s]\n", commentDelimiter.c_str());
 
     for (IniSection_it it = sections_vt.begin(); it != sections_vt.end(); ++it) {
         printf("comment :[\n%s]\n", (*it)->comment.c_str());

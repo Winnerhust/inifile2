@@ -89,6 +89,10 @@ class IniFile
     int GetDoubleValue(const string &section, const string &key, double *value);
     /* 获取section段第一个键为key的bool值，成功返回0，否则返回错误码 */
     int GetBoolValue(const string &section, const string &key, bool *value);
+    /* 获取注释，如果key=""则获取段注释 */
+    int GetComment(const string &section, const string &key, string *comment);
+    /* 获取行尾注释，如果key=""则获取段的行尾注释 */
+    int GetRightComment(const string &section, const string &key, string *rightComment);
 
     /* 获取section段第一个键为key的string值，成功返回获取的值，否则返回默认值 */
     void GetStringValueOrDefault(const string &section, const string &key, string *value, const string &defaultValue);
@@ -112,17 +116,25 @@ class IniFile
     /* 是否存在某个key */
     bool HasKey(const string &section, const string &key);
 
+    /* 设置字符串值 */
     int SetStringValue(const string &section, const string &key, const string &value);
+    /* 设置整形值 */
     int SetIntValue(const string &section, const string &key, int value);
+    /* 设置浮点数值 */
     int SetDoubleValue(const string &section, const string &key, double value);
+    /* 设置布尔值 */
     int SetBoolValue(const string &section, const string &key, bool value);
+    /* 设置注释，如果key=""则设置段注释 */
+    int SetComment(const string &section, const string &key, const string &comment);
+    /* 设置行尾注释，如果key=""则设置段的行尾注释 */
+    int SetRightComment(const string &section, const string &key, const string &rightComment);
 
-    /*删除段*/
+    /* 删除段 */
     void DeleteSection(const string &section);
-    /*删除特定段的特定参数*/
+    /* 删除特定段的特定参数 */
     void DeleteKey(const string &section, const string &key);
-    /*设置注释标记符列表*/
-    void SetCommentHead(const string &head);
+    /*设置注释分隔符，默认为"#" */
+    void SetCommentDelimiter(const string &delimiter);
  private:
     /* 获取section段所有键为key的值,并将值赋到values的vector中,,将注释赋到comments的vector中 */
     int GetValues(const string &section, const string &key, vector<string> *value, vector<string> *comments);
@@ -163,8 +175,8 @@ class IniFile
  private:
     typedef vector<IniSection *>::iterator IniSection_it;
     vector<IniSection *> sections_vt;  // 用于存储段集合的vector容器
-    string fname_;
-    string commentHead;
+    string iniFilePath;
+    string commentDelimiter;
 };
 
 }  // endof namespace inifile
