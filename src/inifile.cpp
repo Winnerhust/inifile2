@@ -33,9 +33,6 @@
 #include <fstream>
 #include "inifile.h"
 
-using std::cout;
-using std::endl;
-
 namespace inifile
 {
 
@@ -70,15 +67,15 @@ int IniFile::UpdateSection(const string &cleanLine, const string &comment,
     // 查找右中括号
     size_t index = cleanLine.find_first_of(']');
     if (index == string::npos) {
-        fprintf(stderr, "没有找到匹配的]\n");
-        return -1;
+        errMsg = string("no matched ] found");
+        return ERR_UNMATCHED_BRACKETS;
     }
 
     int len = index - 1;
     // 若段名为空，继续下一行
     if (len <= 0) {
-        fprintf(stderr, "段为空\n");
-        return -1;
+        errMsg = string("section name is empty");
+        return ERR_SECTION_EMPTY;
     }
 
     // 取段名
@@ -88,8 +85,8 @@ int IniFile::UpdateSection(const string &cleanLine, const string &comment,
 
     //检查段是否已存在
     if (getSection(s) != NULL) {
-        fprintf(stderr, "此段已存在:%s\n", s.c_str());
-        return -1;
+        errMsg = string("section ") + s + string("already exist");
+        return ERR_SECTION_ALREADY_EXISTS;
     }
 
     // 申请一个新段，由于map容器会自动排序，打乱原有顺序，因此改用vector存储（sections_vt）
@@ -104,7 +101,6 @@ int IniFile::UpdateSection(const string &cleanLine, const string &comment,
 
     *section = newSection;
 
-    printf("[%s]: section name = %s\n", __func__, s.c_str());
     return 0;
 }
 
@@ -114,8 +110,8 @@ int IniFile::AddKeyValuePair(const string &cleanLine, const string &comment,
     string key, value;
 
     if (!parse(cleanLine, &key, &value)) {
-        fprintf(stderr, "解析参数失败[%s]\n", cleanLine.c_str());
-        return -1;
+        errMsg = string("parse line failed:") + cleanLine;
+        return ERR_PARSE_KEY_VALUE_FAILED;
     }
 
     IniItem item;
@@ -123,8 +119,6 @@ int IniFile::AddKeyValuePair(const string &cleanLine, const string &comment,
     item.value = value;
     item.comment = comment;
     item.rightComment = rightComment;
-    cout << "item.comment=" << comment << endl;
-    cout << "item.rightComment=" << rightComment << endl;
 
     section->items.push_back(item);
 
@@ -145,8 +139,8 @@ int IniFile::Load(const string &filePath)
     iniFilePath = filePath;
     std::ifstream ifs(iniFilePath);
     if (!ifs.is_open()) {
-        cout << "open file failed\n";
-        return -1;
+        errMsg = string("open") +iniFilePath+ string(" file failed");
+        return ERR_OPEN_FILE_FAILED;
     }
 
     //增加默认段，即 无名段""
@@ -174,10 +168,6 @@ int IniFile::Load(const string &filePath)
 
         // 如果行首不是注释，查找行尾是否存在注释，若存在，切割该行，将注释内容添加到rightComment
         split(line, commentDelimiter, &cleanLine, &rightComment);
-
-        cout << "cleanLine=" <<cleanLine << endl;
-        cout << "comment=\n" << comment << endl;
-        cout << "rightComment=" <<rightComment << endl;
 
         // step 2，判断line内容是否为段或键
         //段开头查找 [
@@ -211,7 +201,7 @@ int IniFile::Save()
 int IniFile::SaveAs(const string &filePath)
 {
     string data = "";
-    cout << "############ SaveAs start ############" << endl;
+
     /* 载入section数据 */
     for (IniSection_it sect = sections_vt.begin(); sect != sections_vt.end(); ++sect) {
         if ((*sect)->comment != "") {
@@ -251,7 +241,6 @@ int IniFile::SaveAs(const string &filePath)
     std::ofstream ofs(filePath);
     ofs << data;
     ofs.close();
-    cout << "############ SaveAs end ############" << endl;
     return 0;
 }
 
@@ -372,7 +361,8 @@ int IniFile::GetComment(const string &section, const string &key, string *commen
     IniSection *sect = getSection(section);
 
     if (sect == NULL) {
-        return RET_ERR;
+        errMsg = string("not find the section ")+section;
+        return ERR_NOT_FOUND_SECTION;
     }
 
     if (key == "") {
@@ -387,7 +377,8 @@ int IniFile::GetComment(const string &section, const string &key, string *commen
         }
     }
 
-    return RET_ERR;
+    errMsg = string("not find the key ")+section;
+    return ERR_NOT_FOUND_KEY;
 }
 
 /* 获取行尾注释，如果key=""则获取段的行尾注释 */
@@ -396,7 +387,8 @@ int IniFile::GetRightComment(const string &section, const string &key, string *r
     IniSection *sect = getSection(section);
 
     if (sect == NULL) {
-        return RET_ERR;
+        errMsg = string("not find the section ")+section;
+        return ERR_NOT_FOUND_SECTION;
     }
 
     if (key == "") {
@@ -411,7 +403,8 @@ int IniFile::GetRightComment(const string &section, const string &key, string *r
         }
     }
 
-    return RET_ERR;
+    errMsg = string("not find the key ")+key;
+    return ERR_NOT_FOUND_KEY;
 }
 
 int IniFile::getValue(const string &section, const string &key, string *value)
@@ -424,17 +417,21 @@ int IniFile::getValue(const string &section, const string &key, string *value, s
 {
     IniSection *sect = getSection(section);
 
-    if (sect != NULL) {
-        for (IniSection::IniItem_it it = sect->begin(); it != sect->end(); ++it) {
-            if (it->key == key) {
-                *value = it->value;
-                *comment = it->comment;
-                return RET_OK;
-            }
+    if (sect == NULL) {
+        errMsg = string("not find the section ")+section;
+        return ERR_NOT_FOUND_SECTION;
+    }
+
+    for (IniSection::IniItem_it it = sect->begin(); it != sect->end(); ++it) {
+        if (it->key == key) {
+            *value = it->value;
+            *comment = it->comment;
+            return RET_OK;
         }
     }
 
-    return RET_ERR;
+    errMsg = string("not find the key ")+key;
+    return ERR_NOT_FOUND_KEY;
 }
 
 int IniFile::GetValues(const string &section, const string &key, vector<string> *values)
@@ -452,19 +449,27 @@ int IniFile::GetValues(const string &section, const string &key, vector<string> 
 
     IniSection *sect = getSection(section);
 
-    if (sect != NULL) {
-        for (IniSection::IniItem_it it = sect->begin(); it != sect->end(); ++it) {
-            if (it->key == key) {
-                value = it->value;
-                comment = it->comment;
+    if (sect == NULL) {
+        errMsg = string("not find the section ")+section;
+        return ERR_NOT_FOUND_SECTION;
+    }
 
-                values->push_back(value);
-                comments->push_back(comment);
-            }
+    for (IniSection::IniItem_it it = sect->begin(); it != sect->end(); ++it) {
+        if (it->key == key) {
+            value = it->value;
+            comment = it->comment;
+
+            values->push_back(value);
+            comments->push_back(comment);
         }
     }
 
-    return (values->size() ? RET_OK : RET_ERR);
+    if (values->size() == 0) {
+        errMsg = string("not find the key ")+key;
+        return ERR_NOT_FOUND_KEY;
+    }
+
+    return RET_OK;
 }
 
 bool IniFile::HasSection(const string &section)
@@ -502,8 +507,8 @@ int IniFile::setValue(const string &section, const string &key, const string &va
         sect = new IniSection();
 
         if (sect == NULL) {
-            fprintf(stderr, "no enough memory!\n");
-            exit(-1);
+            errMsg = string("no enough memory!");
+            return ERR_NO_ENOUGH_MEMORY;
         }
 
         sect->name = section;
@@ -567,7 +572,8 @@ int IniFile::SetComment(const string &section, const string &key, const string &
     IniSection *sect = getSection(section);
 
     if (sect == NULL) {
-        return RET_ERR;
+        errMsg = string("Not find the section ")+section;
+        return ERR_NOT_FOUND_SECTION;
     }
 
     if (key == "") {
@@ -582,7 +588,8 @@ int IniFile::SetComment(const string &section, const string &key, const string &
         }
     }
 
-    return RET_ERR;
+    errMsg = string("not find the key ")+key;
+    return ERR_NOT_FOUND_KEY;
 }
 
 int IniFile::SetRightComment(const string &section, const string &key, const string &rightComment)
@@ -590,7 +597,8 @@ int IniFile::SetRightComment(const string &section, const string &key, const str
     IniSection *sect = getSection(section);
 
     if (sect == NULL) {
-        return RET_ERR;
+        errMsg = string("Not find the section ")+section;
+        return ERR_NOT_FOUND_SECTION;
     }
 
     if (key == "") {
@@ -605,7 +613,8 @@ int IniFile::SetRightComment(const string &section, const string &key, const str
         }
     }
 
-    return RET_ERR;
+    errMsg = string("not find the key ")+key;
+    return ERR_NOT_FOUND_KEY;
 }
 
 void IniFile::SetCommentDelimiter(const string &delimiter)
@@ -681,16 +690,15 @@ bool IniFile::IsCommentLine(const string &str)
 /*--------------------------------------------------------------------------*/
 void IniFile::print()
 {
-    cout << "############ print start ############" << endl;
+    printf("############ print start ############\n");
     printf("filePath:[%s]\n", iniFilePath.c_str());
-
     printf("commentDelimiter:[%s]\n", commentDelimiter.c_str());
 
     for (IniSection_it it = sections_vt.begin(); it != sections_vt.end(); ++it) {
         printf("comment :[\n%s]\n", (*it)->comment.c_str());
         printf("section :\n[%s]\n", (*it)->name.c_str());
         if ((*it)->rightComment != "") {
-            printf("rcomment:\n%s", (*it)->rightComment.c_str());
+            printf("rightComment:\n%s", (*it)->rightComment.c_str());
         }
 
         for (IniSection::IniItem_it i = (*it)->items.begin(); i != (*it)->items.end(); ++i) {
@@ -702,7 +710,13 @@ void IniFile::print()
         }
     }
 
-    cout << "############ print end ############" << endl;
+    printf("############ print end ############\n");
+    return;
+}
+
+const string & IniFile::GetErrMsg()
+{
+    return errMsg;
 }
 
 bool IniFile::StartWith(const string &str, const string &prefix)

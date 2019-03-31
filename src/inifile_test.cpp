@@ -146,9 +146,9 @@ TEST(IniFile, getValue)
     ini.getValue("COMMON", "DB", &value);
     EXPECT_EQ(value, string("sys"));
     ini.GetValues("COMMON", "PASSWD", &valueList);
+    EXPECT_EQ(valueList.size(), 2);
     EXPECT_EQ(valueList[0], string("tt"));
     EXPECT_EQ(valueList[1], string("dd"));
-    EXPECT_EQ(valueList.size(), 2);
 }
 
 TEST(IniFile, reopen)
@@ -183,8 +183,8 @@ TEST(IniFile, reopen)
     EXPECT_EQ(value, string("root2"));
     EXPECT_EQ(ini.GetStringValue("COMMON", "DB", &value), 0);
     EXPECT_EQ(value, string("sys2"));
-    EXPECT_EQ(ini.GetStringValue("COMMON", "PASSWD", &value), -1);
-    EXPECT_EQ(ini.GetStringValue("DEFINE", "name", &value), -1);
+    EXPECT_EQ(ini.GetStringValue("COMMON", "PASSWD", &value), ERR_NOT_FOUND_KEY);
+    EXPECT_EQ(ini.GetStringValue("DEFINE", "name", &value), ERR_NOT_FOUND_SECTION);
 }
 
 TEST(IniFile, SaveAs)

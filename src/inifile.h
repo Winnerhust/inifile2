@@ -37,10 +37,26 @@
 using std::string;
 using std::vector;
 
+#define RET_OK 0
+// 没有找到匹配的]
+#define ERR_UNMATCHED_BRACKETS 2
+// 段为空
+#define ERR_SECTION_EMPTY 3
+// 段名已经存在
+#define ERR_SECTION_ALREADY_EXISTS 4
+// 解析key value失败
+#define ERR_PARSE_KEY_VALUE_FAILED 5
+// 打开文件失败
+#define ERR_OPEN_FILE_FAILED 6
+// 内存不足
+#define ERR_NO_ENOUGH_MEMORY 7
+// 没有找到对应的key
+#define ERR_NOT_FOUND_KEY 8
+// 没有找到对应的section
+#define ERR_NOT_FOUND_SECTION 9
+
 namespace inifile
 {
-const int RET_OK  = 0;
-const int RET_ERR = -1;
 const char delim[] = "\n";
 struct IniItem {
     string key;
@@ -135,6 +151,8 @@ class IniFile
     void DeleteKey(const string &section, const string &key);
     /*设置注释分隔符，默认为"#" */
     void SetCommentDelimiter(const string &delimiter);
+
+    const string &GetErrMsg();
  private:
     /* 获取section段所有键为key的值,并将值赋到values的vector中,,将注释赋到comments的vector中 */
     int GetValues(const string &section, const string &key, vector<string> *value, vector<string> *comments);
@@ -177,6 +195,7 @@ class IniFile
     vector<IniSection *> sections_vt;  // 用于存储段集合的vector容器
     string iniFilePath;
     string commentDelimiter;
+    string errMsg;  // 保存出错时的错误信息
 };
 
 }  // endof namespace inifile
