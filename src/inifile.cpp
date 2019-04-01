@@ -769,7 +769,7 @@ void IniFile::trim(string &str)
 
     int i = 0;
 
-    while (isspace(str[i]) && str[i] != '\0') {
+    while ((i < len) && isspace(str[i]) && (str[i] != '\0')) {
         i++;
     }
 
