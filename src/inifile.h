@@ -128,7 +128,9 @@ class IniFile
     int GetSectionNum();
     /* 是否存在某个section */
     bool HasSection(const string &section);
-
+    /* 获取指定section的所有ken=value信息 */
+    IniSection *getSection(const string &section = "");
+    
     /* 是否存在某个key */
     bool HasKey(const string &section, const string &key);
 
@@ -168,7 +170,6 @@ class IniFile
     static void trim(string &str);
     /* 将字符串str按分割符delim分割成多个子串 */
  private:
-    IniSection *getSection(const string &section = "");
     int UpdateSection(const string &cleanLine, const string &comment,
                       const string &rightComment, IniSection **section);
     int AddKeyValuePair(const string &cleanLine, const string &comment,
