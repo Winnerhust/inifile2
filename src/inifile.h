@@ -188,7 +188,7 @@ class IniFile
     /* 获取section段第一个键为key的值,并将值赋到value中,将注释赋到comment中 */
     int getValue(const string &section, const string &key, string *value, string *comment);
 
-    int StringCmpIgnoreCase(const string &str1, const string &str2);
+    bool StringCmpIgnoreCase(const string &str1, const string &str2);
     bool StartWith(const string &str, const string &prefix);
 
  private:

@@ -305,9 +305,9 @@ int IniFile::GetBoolValue(const string &section, const string &key, bool *value)
 
     err = getValue(section, key, &strValue);
 
-    if ((StringCmpIgnoreCase(strValue, "true") == 0) || (StringCmpIgnoreCase(strValue, "1") == 0)) {
+    if (StringCmpIgnoreCase(strValue, "true") || StringCmpIgnoreCase(strValue, "1")) {
         *value = true;
-    } else if ((StringCmpIgnoreCase(strValue, "false") == 0) || (StringCmpIgnoreCase(strValue, "0") == 0)) {
+    } else if (StringCmpIgnoreCase(strValue, "false") || StringCmpIgnoreCase(strValue, "0")) {
         *value = false;
     }
 
@@ -825,7 +825,7 @@ bool IniFile::split(const string &str, const string &sep, string *pleft, string 
     }
 }
 
-int IniFile::StringCmpIgnoreCase(const string &str1, const string &str2)
+bool IniFile::StringCmpIgnoreCase(const string &str1, const string &str2)
 {
     string a = str1;
     string b = str2;
