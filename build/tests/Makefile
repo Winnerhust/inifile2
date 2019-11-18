@@ -80,14 +80,14 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/d/inifile2/build/CMakeFiles /mnt/d/inifile2/build/CMakeFiles/progress.marks
-	$(MAKE) -f CMakeFiles/Makefile2 all
+	cd /mnt/d/inifile2/build && $(CMAKE_COMMAND) -E cmake_progress_start /mnt/d/inifile2/build/CMakeFiles /mnt/d/inifile2/build/tests/CMakeFiles/progress.marks
+	cd /mnt/d/inifile2/build && $(MAKE) -f CMakeFiles/Makefile2 tests/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/d/inifile2/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	$(MAKE) -f CMakeFiles/Makefile2 clean
+	cd /mnt/d/inifile2/build && $(MAKE) -f CMakeFiles/Makefile2 tests/clean
 .PHONY : clean
 
 # The main clean target
@@ -97,83 +97,48 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /mnt/d/inifile2/build && $(MAKE) -f CMakeFiles/Makefile2 tests/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /mnt/d/inifile2/build && $(MAKE) -f CMakeFiles/Makefile2 tests/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /mnt/d/inifile2/build && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
-#=============================================================================
-# Target rules for targets named inifile
+# Convenience name for target.
+tests/CMakeFiles/inifile_test.dir/rule:
+	cd /mnt/d/inifile2/build && $(MAKE) -f CMakeFiles/Makefile2 tests/CMakeFiles/inifile_test.dir/rule
+.PHONY : tests/CMakeFiles/inifile_test.dir/rule
 
-# Build rule for target.
-inifile: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 inifile
-.PHONY : inifile
+# Convenience name for target.
+inifile_test: tests/CMakeFiles/inifile_test.dir/rule
 
-# fast build rule for target.
-inifile/fast:
-	$(MAKE) -f src/CMakeFiles/inifile.dir/build.make src/CMakeFiles/inifile.dir/build
-.PHONY : inifile/fast
-
-#=============================================================================
-# Target rules for targets named inifile_test
-
-# Build rule for target.
-inifile_test: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 inifile_test
 .PHONY : inifile_test
 
 # fast build rule for target.
 inifile_test/fast:
-	$(MAKE) -f test/CMakeFiles/inifile_test.dir/build.make test/CMakeFiles/inifile_test.dir/build
+	cd /mnt/d/inifile2/build && $(MAKE) -f tests/CMakeFiles/inifile_test.dir/build.make tests/CMakeFiles/inifile_test.dir/build
 .PHONY : inifile_test/fast
 
-#=============================================================================
-# Target rules for targets named test
+# target to build an object file
+inifile_test.o:
+	cd /mnt/d/inifile2/build && $(MAKE) -f tests/CMakeFiles/inifile_test.dir/build.make tests/CMakeFiles/inifile_test.dir/inifile_test.o
+.PHONY : inifile_test.o
 
-# Build rule for target.
-test: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 test
-.PHONY : test
+# target to preprocess a source file
+inifile_test.i:
+	cd /mnt/d/inifile2/build && $(MAKE) -f tests/CMakeFiles/inifile_test.dir/build.make tests/CMakeFiles/inifile_test.dir/inifile_test.i
+.PHONY : inifile_test.i
 
-# fast build rule for target.
-test/fast:
-	$(MAKE) -f test/CMakeFiles/test.dir/build.make test/CMakeFiles/test.dir/build
-.PHONY : test/fast
-
-#=============================================================================
-# Target rules for targets named gtest
-
-# Build rule for target.
-gtest: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 gtest
-.PHONY : gtest
-
-# fast build rule for target.
-gtest/fast:
-	$(MAKE) -f test/googletest/CMakeFiles/gtest.dir/build.make test/googletest/CMakeFiles/gtest.dir/build
-.PHONY : gtest/fast
-
-#=============================================================================
-# Target rules for targets named gtest_main
-
-# Build rule for target.
-gtest_main: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 gtest_main
-.PHONY : gtest_main
-
-# fast build rule for target.
-gtest_main/fast:
-	$(MAKE) -f test/googletest/CMakeFiles/gtest_main.dir/build.make test/googletest/CMakeFiles/gtest_main.dir/build
-.PHONY : gtest_main/fast
+# target to generate assembly for a file
+inifile_test.s:
+	cd /mnt/d/inifile2/build && $(MAKE) -f tests/CMakeFiles/inifile_test.dir/build.make tests/CMakeFiles/inifile_test.dir/inifile_test.s
+.PHONY : inifile_test.s
 
 # Help Target
 help:
@@ -182,12 +147,11 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
-	@echo "... edit_cache"
-	@echo "... inifile"
 	@echo "... inifile_test"
-	@echo "... test"
-	@echo "... gtest"
-	@echo "... gtest_main"
+	@echo "... edit_cache"
+	@echo "... inifile_test.o"
+	@echo "... inifile_test.i"
+	@echo "... inifile_test.s"
 .PHONY : help
 
 
@@ -199,6 +163,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /mnt/d/inifile2/build && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

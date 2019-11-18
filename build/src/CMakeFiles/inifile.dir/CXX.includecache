@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/mnt/d/inifile2/src/inifile.cpp
+stdlib.h
+-
+stdio.h
+-
+ctype.h
+-
+iostream
+-
+fstream
+-
+inifile.h
+/mnt/d/inifile2/src/inifile.h
+
+/mnt/d/inifile2/src/inifile.h
+vector
+-
+algorithm
+-
+string
+-
+string.h
+-
+

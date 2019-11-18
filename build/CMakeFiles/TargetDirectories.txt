@@ -1,0 +1,13 @@
+/mnt/d/inifile2/build/CMakeFiles/rebuild_cache.dir
+/mnt/d/inifile2/build/CMakeFiles/edit_cache.dir
+/mnt/d/inifile2/build/src/CMakeFiles/rebuild_cache.dir
+/mnt/d/inifile2/build/src/CMakeFiles/inifile.dir
+/mnt/d/inifile2/build/src/CMakeFiles/edit_cache.dir
+/mnt/d/inifile2/build/test/CMakeFiles/rebuild_cache.dir
+/mnt/d/inifile2/build/test/CMakeFiles/edit_cache.dir
+/mnt/d/inifile2/build/test/CMakeFiles/inifile_test.dir
+/mnt/d/inifile2/build/test/CMakeFiles/test.dir
+/mnt/d/inifile2/build/test/googletest/CMakeFiles/rebuild_cache.dir
+/mnt/d/inifile2/build/test/googletest/CMakeFiles/gtest.dir
+/mnt/d/inifile2/build/test/googletest/CMakeFiles/edit_cache.dir
+/mnt/d/inifile2/build/test/googletest/CMakeFiles/gtest_main.dir

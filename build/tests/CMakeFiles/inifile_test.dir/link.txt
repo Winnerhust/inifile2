@@ -1,0 +1,1 @@
+/usr/bin/c++    -rdynamic CMakeFiles/inifile_test.dir/inifile_test.o  -o ../bin/inifile_test  -L/mnt/d/inifile2/build/lib ../lib/libinifile.a ../lib/libgtest.a ../lib/libgtest_main.a ../lib/libgtest.a -lpthread 
