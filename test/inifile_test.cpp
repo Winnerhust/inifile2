@@ -5,7 +5,7 @@
 #define private   public
 #define protected public
 
-#include "inifile.h"·
+#include "inifile.h"
 
 using std::cout;
 using std::endl;
