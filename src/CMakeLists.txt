@@ -1,1 +1,5 @@
 add_library(inifile STATIC inifile.cpp)
+add_library(inifile_share SHARED inifile.cpp)
+add_custom_target(rename_share_so COMMAND mv ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libinifile_share.so ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libinifile.so )
+add_dependencies(rename_share_so inifile_share)
+add_dependencies(inifile rename_share_so)
