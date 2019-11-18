@@ -10,6 +10,6 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: make
-      run: cd build && cmake && make -j8
+      run: cd build && cmake .. && make -j8
     - name: make test
       run: make test
