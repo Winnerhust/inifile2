@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../lib/libinifile.a  CMakeFiles/inifile.dir/inifile.o
-/usr/bin/ranlib ../lib/libinifile.a
