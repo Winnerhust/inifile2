@@ -35,7 +35,7 @@ int ret = 0;
 string db_name = ini.getValue("COMMON","DB",ret);
 ```
 
-#本地构建方式
+本地构建方式
 ```
 cd build && cmake .. && make -j8 && make test
 ```
