@@ -51,7 +51,7 @@ usage: ./build.sh [clean] [-h|--help]
 
 1. 源码引用:
 
-编译时将src目录下的inifile.cpp 和inifile.h 拷贝到您的源码中直接进行编译即可,对应编译选项或者编译器有要求的建议使用这种源码拷贝的方式.
+编译时将src目录下的inifile.cpp 和inifile.h 拷贝到您的源码中直接进行编译即可,对于编译选项或者编译器有要求的建议使用这种源码拷贝的方式.
 
 2. 二进制库引用:libinifile.so或者libinifile.a 引用
 
