@@ -36,6 +36,12 @@ string db_name = ini.getValue("COMMON","DB",ret);
 ```
 
 本地构建方式
+
+* 构建: `./build.sh`
+* 清理: `./build.sh clean`
+* 帮助: `./build.sh -h` 或者`./build.sh --help`
+
 ```
-cd build && cmake .. && make -j8 && make test
+$./build.sh --help
+./build.sh [clean] [-h|--help]
 ```
