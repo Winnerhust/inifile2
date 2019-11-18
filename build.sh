@@ -18,7 +18,7 @@ function build_test()
 
 function usage()
 {
-    echo "./build.sh [clean] [-h|--help]"
+    echo "usage: ./build.sh [clean] [-h|--help]"
 }
 
 opt=""

@@ -43,5 +43,5 @@ string db_name = ini.getValue("COMMON","DB",ret);
 
 ```
 $./build.sh --help
-./build.sh [clean] [-h|--help]
+usage: ./build.sh [clean] [-h|--help]
 ```
