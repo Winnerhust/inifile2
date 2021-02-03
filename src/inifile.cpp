@@ -424,6 +424,10 @@ int IniFile::getValue(const string &section, const string &key, string *value, s
 
     for (IniSection::IniItem_it it = sect->begin(); it != sect->end(); ++it) {
         if (it->key == key) {
+            if (it->value.empty()) {
+                return ERR_VALUE_IS_EMPTY;
+            }
+
             *value = it->value;
             *comment = it->comment;
             return RET_OK;
@@ -467,6 +471,9 @@ int IniFile::GetValues(const string &section, const string &key, vector<string> 
     if (values->size() == 0) {
         errMsg = string("not find the key ")+key;
         return ERR_NOT_FOUND_KEY;
+    }
+    else if (values->size() == 1 && values->front().empty()) {
+        return ERR_VALUE_IS_EMPTY;
     }
 
     return RET_OK;

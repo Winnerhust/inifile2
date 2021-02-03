@@ -54,6 +54,8 @@ using std::vector;
 #define ERR_NOT_FOUND_KEY 8
 // 没有找到对应的section
 #define ERR_NOT_FOUND_SECTION 9
+// 找到的值为空
+#define ERR_VALUE_IS_EMPTY 10
 
 namespace inifile
 {
